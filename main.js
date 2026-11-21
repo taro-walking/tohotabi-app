@@ -1,7 +1,7 @@
 // アプリ全体の司令塔となる処理です。画面のHTMLがすべて読み込まれた瞬間に動き始めます
 document.addEventListener('DOMContentLoaded', function() {
 
-  // 【共通処理】最新データを読み込み、計算して、画面全体を描画し直す関数
+  // 【共通処理】最新データを読み込み、計算して、画面全体と地図を描画し直す関数
   function refreshApp() {
     // 1. StorageManagerから現在の保存データを読み込みます
     const currentData = StorageManager.loadData();
@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 5. UIManagerにすべての結果を渡して、画面を最新の状態に書き換えます
     UIManager.renderAll(currentData, progress, message, dailySummary);
+
+    // 6. MapManagerに現在のコースと進行状況を渡して、地図の線とピンを更新します
+    MapManager.updateMap(currentData.currentCourseId, progress);
   }
 
   // --- アプリ起動時の初期セットアップ ---
@@ -60,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     StorageManager.addStepRecord(dateVal, Number(stepsVal));
     // 歩数入力欄を空欄に戻します（連続入力の誤操作を防ぐため）
     document.getElementById('input-steps').value = '';
-    // 画面全体を最新の状態に更新します
+    // 画面全体と地図を最新の状態に更新します
     refreshApp();
     // 登録完了のメッセージを表示します
     alert(stepsVal + ' 歩を記録しました！');
@@ -80,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // StorageManagerに設定変更を保存します
     StorageManager.updateSettings(selectedCourse, Number(strideVal));
-    // 変更したコースや歩幅で距離や到達地点を再計算し、画面を更新します
+    // 変更したコースや歩幅で距離や到達地点を再計算し、画面と地図を更新します
     refreshApp();
     // 保存完了のメッセージを表示します
     alert('設定を保存しました！');
@@ -93,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isConfirmed) {
       // データを完全に初期化します
       StorageManager.clearAllData();
-      // 画面を初期状態に描き直します
+      // 画面と地図を初期状態に描き直します
       refreshApp();
       alert('データをリセットしました。');
     }

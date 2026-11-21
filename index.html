@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <!-- ブラウザのタブやホーム画面に表示されるタイトルです -->
   <title>徒歩旅（仮）</title>
-  <!-- これから作成するデザイン用ファイル（style.css）を読み込みます -->
+  <!-- 画面デザイン用ファイル（style.css）を読み込みます -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,7 +21,7 @@
     <header class="app-header">
       <!-- アプリのタイトルを表示します -->
       <h1>🚶 徒歩旅（仮）</h1>
-      <!-- 現在選択中のコース名を表示する場所です（後からJSで書き換えます） -->
+      <!-- 現在選択中のコース名を表示する場所です -->
       <p id="header-course-name" class="course-subtitle">コース読み込み中...</p>
     </header>
 
@@ -45,7 +45,7 @@
         <p id="encouragement-msg">今日も一歩ずつ進みましょう！</p>
       </section>
 
-      <!-- 現在の到達地点と観光・物産情報を表示するカードです -->
+      <!-- 現在の到達地点と観光・物産情報、地図を表示するカードです -->
       <section class="card status-card">
         <h2>現在の到達地点</h2>
         <!-- 到達した市町村名を表示します -->
@@ -66,6 +66,8 @@
           <p><strong>🏯 名所：</strong><span id="latest-spot">---</span></p>
           <p><strong>🍱 特産：</strong><span id="latest-specialty">---</span></p>
         </div>
+        <!-- 自前プログラム（map.js）で国土地理院地図とルートを描画する枠です -->
+        <div id="route-map" style="position: relative; height: 280px; width: 100%; margin-top: 12px; border-radius: 8px; border: 1px solid #cccccc; background-color: #e8eef2; overflow: hidden;"></div>
       </section>
 
       <!-- 日々の歩数を手入力するカードです -->
@@ -76,7 +78,7 @@
           <label for="input-date">日付</label>
           <input type="date" id="input-date">
         </div>
-        <!-- 歩数を数字で入力する欄です（iPhoneで数字キーボードが出るようinputmodeを指定） -->
+        <!-- 歩数を数字で入力する欄です -->
         <div class="form-group">
           <label for="input-steps">歩数（歩）</label>
           <input type="number" id="input-steps" inputmode="numeric" placeholder="例: 8000">
@@ -146,6 +148,8 @@
   <script src="logic.js"></script>
   <!-- 4. 画面表示の更新担当を読み込みます -->
   <script src="ui.js"></script>
+  <!-- 4.5 自作の地図描画プログラム（外部ライブラリ不要）を読み込みます -->
+  <script src="map.js"></script>
   <!-- 5. メイン制御を読み込みます -->
   <script src="main.js"></script>
 </body>
