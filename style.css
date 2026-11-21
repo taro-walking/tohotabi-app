@@ -1,0 +1,285 @@
+/* すべての要素のサイズ計算を扱いやすくする基本設定です */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 画面全体の背景色や文字フォントを設定します */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  background-color: #f2f5f3;
+  color: #333333;
+  line-height: 1.5;
+  /* iPhoneの下部ホームバーに隠れないよう余白を確保します */
+  padding-bottom: 40px;
+}
+
+/* アプリ全体の横幅をスマホ向けに調整します */
+.app-container {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* 上部ヘッダーのデザインです（旅らしい落ち着いた深緑色） */
+.app-header {
+  background-color: #2e6f40;
+  color: #ffffff;
+  padding: 16px;
+  text-align: center;
+}
+
+/* ヘッダー内のタイトル文字サイズです */
+.app-header h1 {
+  font-size: 1.3rem;
+  margin-bottom: 4px;
+}
+
+/* ヘッダー内のコース名表示のスタイルです */
+.course-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* 3つのタブボタンを横並びに配置します */
+.tab-nav {
+  display: flex;
+  background-color: #ffffff;
+  border-bottom: 2px solid #dddddd;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* 各タブボタンの見た目です */
+.tab-btn {
+  flex: 1;
+  padding: 12px 4px;
+  border: none;
+  background: none;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #666666;
+  cursor: pointer;
+}
+
+/* 現在選択されているタブボタンの強調デザインです */
+.tab-btn.active {
+  color: #2e6f40;
+  border-bottom: 3px solid #2e6f40;
+  background-color: #f4faf6;
+}
+
+/* タブの中身（初期状態では非表示にしておきます） */
+.tab-content {
+  display: none;
+  padding: 12px;
+}
+
+/* 選択中のタブの中身だけを表示します */
+.tab-content.active {
+  display: block;
+}
+
+/* 情報をまとめる白いカードのデザインです */
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* カード内の見出しデザインです */
+.card h2 {
+  font-size: 1rem;
+  color: #2e6f40;
+  border-left: 4px solid #2e6f40;
+  padding-left: 8px;
+  margin-bottom: 12px;
+}
+
+/* 励ましメッセージカードの特別デザインです */
+.message-card {
+  background-color: #fff9e6;
+  border: 1px solid #f0d78c;
+  font-weight: bold;
+  color: #6b5300;
+  text-align: center;
+}
+
+/* 到達した市町村名を大きく目立たせます */
+.highlight-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f4e2c;
+  text-align: center;
+  margin: 8px 0 12px;
+}
+
+/* 累計距離と累計歩数を横並びにする枠です */
+.stats-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* 距離・歩数それぞれの箱のデザインです */
+.stat-box {
+  flex: 1;
+  background-color: #f4faf6;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+/* 距離・歩数のラベル文字です */
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #666666;
+}
+
+/* 距離・歩数の数値文字です */
+.stat-value {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #2e6f40;
+}
+
+/* 名所・特産品を表示する枠のデザインです */
+.spot-info {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* 名所・特産品の行間を少し空けます */
+.spot-info p {
+  margin-bottom: 4px;
+}
+
+/* 入力フォームの1項目ごとの余白です */
+.form-group {
+  margin-bottom: 14px;
+}
+
+/* 入力欄のラベル文字です */
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+/* 入力ボックスやプルダウンをiPhoneで押しやすいサイズにします */
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+/* 補足説明の小さい文字です */
+.help-text {
+  display: block;
+  font-size: 0.75rem;
+  color: #777777;
+  margin-top: 4px;
+}
+
+/* メインの実行ボタン（緑色）のデザインです */
+.primary-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #2e6f40;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ボタンを押した瞬間に少し色を濃くします */
+.primary-btn:active {
+  background-color: #225430;
+}
+
+/* リセットボタン（赤色）のデザインです */
+.danger-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #ffffff;
+  color: #d93025;
+  border: 1px solid #d93025;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 棒グラフを表示する枠のスタイルです */
+.chart-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 160px;
+  padding-top: 20px;
+  border-bottom: 1px solid #cccccc;
+}
+
+/* 棒グラフの1日分の列のスタイルです */
+.chart-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+/* 棒グラフの緑色の棒そのもののスタイルです */
+.chart-bar {
+  width: 24px;
+  background-color: #4caf50;
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+}
+
+/* 棒の上に出す歩数ラベルです */
+.chart-val {
+  font-size: 0.65rem;
+  color: #555555;
+  margin-bottom: 2px;
+}
+
+/* 棒の下に出す日付ラベルです */
+.chart-date {
+  font-size: 0.7rem;
+  color: #666666;
+  margin-top: 4px;
+}
+
+/* コース通過チェックリストのスタイルです */
+.point-list {
+  list-style: none;
+}
+
+/* チェックリストの各行のスタイルです */
+.point-item {
+  padding: 10px 8px;
+  border-bottom: 1px solid #eeeeee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* すでに通過した地点は背景を薄い緑色にします */
+.point-item.passed {
+  background-color: #f4faf6;
+  font-weight: bold;
+  color: #2e6f40;
+}
