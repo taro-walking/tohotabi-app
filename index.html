@@ -3,40 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>徒歩旅 動作確認テスト</title>
+  <title>徒歩旅 計算ロジックテスト</title>
 </head>
 <body>
-  <!-- 画面の見出しを表示します -->
-  <h1>徒歩旅（仮）動作テスト</h1>
-  
-  <!-- テスト結果の文字を流し込むための「空の箱」を用意します -->
+  <h1>徒歩旅（仮）計算・判定テスト</h1>
   <div id="test-area"></div>
 
-  <!-- 1. 前回作ったマスターデータを読み込みます -->
+  <!-- 1. マスターデータ -->
   <script src="master.js"></script>
-  
-  <!-- 2. 今回作った保存管理プログラムを読み込みます -->
+  <!-- 2. 保存管理 -->
   <script src="storage.js"></script>
+  <!-- 3. 今回作った計算・位置判定 -->
+  <script src="logic.js"></script>
 
-  <!-- 3. ここから動作確認用のテストプログラムを実行します -->
   <script>
-    // テスト用に一旦データをリセットします
+    // テスト用にデータを初期化します（歩幅70cm、コースはcourse1）
     StorageManager.clearAllData();
     
-    // 「2026-11-21 に 5000歩 歩いた」というデータを保存します
-    StorageManager.addStepRecord('2026-11-21', 5000);
+    // 合計 25,000歩（25,000 × 70cm = 17.5km）歩いたことにします
+    // 仙台(0km)と塩竈市(15km)を通過し、松島町(25km)へ向かっているはずです
+    StorageManager.addStepRecord('2026-11-20', 10000);
+    StorageManager.addStepRecord('2026-11-21', 15000);
     
-    // さらに「2026-11-21 に 3000歩 追加で歩いた」というデータを保存します
-    StorageManager.addStepRecord('2026-11-21', 3000);
+    // 保存データを読み込みます
+    const data = StorageManager.loadData();
     
-    // 保存されたデータを読み込みます（合計 8000歩 になるはずです）
-    const testResult = StorageManager.loadData();
+    // logic.js を使って現在の進行状況を判定します
+    const progress = WalkLogic.evaluateProgress(data.currentCourseId, data.totalSteps, data.strideCm);
     
-    // 画面の「空の箱（test-area）」を取得します
+    // 励ましメッセージを生成します
+    const message = WalkLogic.createEncouragementMessage(progress);
+    
+    // 結果を画面に表示します
     const area = document.getElementById('test-area');
-    
-    // 箱の中にテスト結果のメッセージを表示します
-    area.innerHTML = '<p>【保存テスト成功】累計歩数：' + testResult.totalSteps + '歩（記録件数：' + testResult.history.length + '件）</p>';
+    area.innerHTML = 
+      '<p><strong>コース：</strong>' + progress.courseName + '</p>' +
+      '<p><strong>累計距離：</strong>' + progress.currentKm + ' km（' + data.totalSteps + '歩）</p>' +
+      '<p><strong>最新到達地：</strong>' + progress.latestPoint.name + '（特産：' + progress.latestPoint.specialty + '）</p>' +
+      '<p><strong>メッセージ：</strong>' + message + '</p>';
   </script>
 </body>
 </html>
