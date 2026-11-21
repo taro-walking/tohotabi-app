@@ -1,35 +1,42 @@
-<!-- このファイルが最新のHTML（HTML5）であることをブラウザに伝える宣言です -->
 <!DOCTYPE html>
-<!-- Webページ全体の始まりと、言語が日本語であることを指定します -->
 <html lang="ja">
-<!-- 裏方の設定情報をまとめる場所です -->
 <head>
-  <!-- 文字化けを防ぐため、文字コードをUTF-8に指定します -->
   <meta charset="UTF-8">
-  <!-- iPhone 17の画面幅にピッタリ合わせる設定です -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- アプリのタイトルです -->
-  <title>徒歩旅（仮）</title>
-<!-- 裏方の設定の終わりです -->
+  <title>徒歩旅 動作確認テスト</title>
 </head>
-<!-- ここから下が画面に表示される中身です -->
 <body>
-  <!-- アプリのタイトルを見出しとして表示します -->
-  <h1>徒歩旅（仮）</h1>
-  <!-- テスト結果を表示するための空っぽの枠（id="test-area"）を用意します -->
-  <div id="test-area">データを読み込み中...</div>
+  <!-- 画面の見出しを表示します -->
+  <h1>徒歩旅（仮）動作テスト</h1>
+  
+  <!-- テスト結果の文字を流し込むための「空の箱」を用意します -->
+  <div id="test-area"></div>
 
-  <!-- ① 先ほど作成した「市町村マスター（master.js）」をこのページに読み込みます -->
+  <!-- 1. 前回作ったマスターデータを読み込みます -->
   <script src="master.js"></script>
+  
+  <!-- 2. 今回作った保存管理プログラムを読み込みます -->
+  <script src="storage.js"></script>
 
-  <!-- 読み込んだマスターデータの中身を画面に表示してテストするための小さな命令です -->
+  <!-- 3. ここから動作確認用のテストプログラムを実行します -->
   <script>
-    // 画面上の「test-area」という枠を探して、文字を書き換える準備をします
-    const testArea = document.getElementById("test-area");
-    // MASTER_DATAの中から、1つ目のコース名と、2番目の地点名（塩竈市）を取り出して画面に表示します
-    testArea.innerHTML = "読み込み成功！<br>コース名：" + MASTER_DATA.course1.name + "<br>2番目の地点：" + MASTER_DATA.course1.points[1].name + "（名物：" + MASTER_DATA.course1.points[1].specialty + "）";
+    // テスト用に一旦データをリセットします
+    StorageManager.clearAllData();
+    
+    // 「2026-11-21 に 5000歩 歩いた」というデータを保存します
+    StorageManager.addStepRecord('2026-11-21', 5000);
+    
+    // さらに「2026-11-21 に 3000歩 追加で歩いた」というデータを保存します
+    StorageManager.addStepRecord('2026-11-21', 3000);
+    
+    // 保存されたデータを読み込みます（合計 8000歩 になるはずです）
+    const testResult = StorageManager.loadData();
+    
+    // 画面の「空の箱（test-area）」を取得します
+    const area = document.getElementById('test-area');
+    
+    // 箱の中にテスト結果のメッセージを表示します
+    area.innerHTML = '<p>【保存テスト成功】累計歩数：' + testResult.totalSteps + '歩（記録件数：' + testResult.history.length + '件）</p>';
   </script>
-<!-- 画面表示の終わりです -->
 </body>
-<!-- Webページ全体の終わりです -->
 </html>
