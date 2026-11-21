@@ -3,14 +3,14 @@
 <head>
   <!-- 文字化けを防ぐための文字コード指定です -->
   <meta charset="UTF-8">
-  <!-- iPhoneの画面幅に合わせ、勝手に拡大縮小されないようにする重要な設定です -->
+  <!-- iPhoneの画面幅に合わせる重要な設定です -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- ホーム画面から開いた時にブラウザのURLバーを隠してアプリ風にするiPhone専用設定です -->
+  <!-- ホーム画面から開いた時にアプリ風にするiPhone専用設定です -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <!-- ブラウザのタブやホーム画面に表示されるタイトルです -->
   <title>徒歩旅（仮）</title>
   <!-- 画面デザイン用ファイル（style.css）を読み込みます -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261121c">
 </head>
 <body>
 
@@ -66,8 +66,8 @@
           <p><strong>🏯 名所：</strong><span id="latest-spot">---</span></p>
           <p><strong>🍱 特産：</strong><span id="latest-specialty">---</span></p>
         </div>
-        <!-- 自前プログラム（map.js）で国土地理院地図とルートを描画する枠です -->
-        <div id="route-map" style="position: relative; height: 280px; width: 100%; margin-top: 12px; border-radius: 8px; border: 1px solid #cccccc; background-color: #e8eef2; overflow: hidden;"></div>
+        <!-- 拡大縮小・ピンタップができる地図を表示する枠です -->
+        <div id="route-map" style="position: relative; height: 320px; width: 100%; margin-top: 12px; border-radius: 8px; border: 1px solid #cccccc; background-color: #dce8f0; overflow: hidden; user-select: none;"></div>
       </section>
 
       <!-- 日々の歩数を手入力するカードです -->
@@ -141,16 +141,18 @@
   </div>
 
   <!-- 1. 市町村マスターデータを読み込みます -->
-  <script src="master.js"></script>
+  <script src="master.js?v=20261121c"></script>
   <!-- 2. 保存データ管理を読み込みます -->
-  <script src="storage.js"></script>
+  <script src="storage.js?v=20261121c"></script>
   <!-- 3. 計算・位置判定を読み込みます -->
-  <script src="logic.js"></script>
+  <script src="logic.js?v=20261121c"></script>
   <!-- 4. 画面表示の更新担当を読み込みます -->
-  <script src="ui.js"></script>
-  <!-- 4.5 自作の地図描画プログラム（外部ライブラリ不要）を読み込みます -->
-  <script src="map.js"></script>
+  <script src="ui.js?v=20261121c"></script>
+  <!-- 4.4 座標計算専用モジュールを読み込みます -->
+  <script src="map-calc.js?v=20261121c"></script>
+  <!-- 4.5 地図描画モジュールを読み込みます -->
+  <script src="map.js?v=20261121c"></script>
   <!-- 5. メイン制御を読み込みます -->
-  <script src="main.js"></script>
+  <script src="main.js?v=20261121c"></script>
 </body>
 </html>
