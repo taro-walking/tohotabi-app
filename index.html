@@ -8,9 +8,9 @@
   <!-- ホーム画面から開いた時にアプリ風にするiPhone専用設定です -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <!-- ブラウザのタブやホーム画面に表示されるタイトルです -->
-  <title>徒歩旅（仮）</title>
+  <title>マイ・ウォーキング旅</title>
   <!-- 画面デザイン用ファイル（style.css）を読み込みます -->
-  <link rel="stylesheet" href="style.css?v=20261121c">
+  <link rel="stylesheet" href="style.css?v=20261122a">
 </head>
 <body>
 
@@ -20,7 +20,7 @@
     <!-- 画面上部のヘッダー部分です -->
     <header class="app-header">
       <!-- アプリのタイトルを表示します -->
-      <h1>🚶 徒歩旅（仮）</h1>
+      <h1>🚶 マイ・ウォーキング旅</h1>
       <!-- 現在選択中のコース名を表示する場所です -->
       <p id="header-course-name" class="course-subtitle">コース読み込み中...</p>
     </header>
@@ -40,51 +40,38 @@
     <!-- ========================================== -->
     <main id="tab-home" class="tab-content active">
 
-      <!-- 励ましメッセージを表示する目立つカードです -->
+      <!-- 励ましメッセージを表示するコンパクトなカードです -->
       <section class="card message-card">
         <p id="encouragement-msg">今日も一歩ずつ進みましょう！</p>
       </section>
 
-      <!-- 現在の到達地点と観光・物産情報、地図を表示するカードです -->
+      <!-- 現在の到達地点と観光・物産情報、地図を表示するメインカードです -->
       <section class="card status-card">
-        <h2>現在の到達地点</h2>
-        <!-- 到達した市町村名を表示します -->
-        <div id="latest-point-name" class="highlight-title">---</div>
-        <!-- 累計距離と累計歩数を並べて表示します -->
-        <div class="stats-row">
-          <div class="stat-box">
-            <span class="stat-label">累計距離</span>
-            <span id="total-km" class="stat-value">0 km</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-label">累計歩数</span>
-            <span id="total-steps" class="stat-value">0 歩</span>
+        <!-- 到達地点名と累計データを1行にまとめて高さを節約します -->
+        <div class="status-header">
+          <div id="latest-point-name" class="highlight-title">---</div>
+          <div class="stats-inline">
+            <span id="total-km" class="stat-badge">0 km</span>
+            <span id="total-steps" class="stat-badge">0 歩</span>
           </div>
         </div>
-        <!-- その街の名所と特産品を表示する枠です -->
+        <!-- その街の名所と特産品をコンパクトに表示する枠です -->
         <div class="spot-info">
-          <p><strong>🏯 名所：</strong><span id="latest-spot">---</span></p>
-          <p><strong>🍱 特産：</strong><span id="latest-specialty">---</span></p>
+          <span><strong>🏯</strong> <span id="latest-spot">---</span></span>
+          <span><strong>🍱</strong> <span id="latest-specialty">---</span></span>
         </div>
-        <!-- 拡大縮小・ピンタップができる地図を表示する枠です -->
-        <div id="route-map" style="position: relative; height: 320px; width: 100%; margin-top: 12px; border-radius: 8px; border: 1px solid #cccccc; background-color: #dce8f0; overflow: hidden; user-select: none;"></div>
+        <!-- 拡大縮小・ピンタップができる地図を表示する枠です（高さはCSSで自動調整） -->
+        <div id="route-map" class="route-map-box"></div>
       </section>
 
-      <!-- 日々の歩数を手入力するカードです -->
+      <!-- 日々の歩数を手入力するコンパクトなカードです -->
       <section class="card input-card">
-        <h2>歩数を記録する</h2>
-        <!-- 日付を選ぶ入力欄です -->
-        <div class="form-group">
-          <label for="input-date">日付</label>
-          <input type="date" id="input-date">
+        <!-- 日付と歩数とボタンを横並びに配置して1画面に収めます -->
+        <div class="input-row">
+          <input type="date" id="input-date" aria-label="日付">
+          <input type="number" id="input-steps" inputmode="numeric" placeholder="歩数" aria-label="歩数">
+          <button id="btn-add-steps" class="primary-btn compact-btn">記録</button>
         </div>
-        <!-- 歩数を数字で入力する欄です -->
-        <div class="form-group">
-          <label for="input-steps">歩数（歩）</label>
-          <input type="number" id="input-steps" inputmode="numeric" placeholder="例: 8000">
-        </div>
-        <!-- 記録を保存する実行ボタンです -->
-        <button id="btn-add-steps" class="primary-btn">この歩数を記録する</button>
       </section>
 
     </main>
@@ -93,7 +80,7 @@
     <!-- 【画面2】旅の記録・グラフタブ              -->
     <!-- ========================================== -->
     <section id="tab-history" class="tab-content">
-      <!-- 直近7日間の歩数を棒グラフで表示するカードです -->
+      <!-- 直近の歩数を棒グラフで表示するカードです -->
       <div class="card">
         <h2>日別歩数グラフ（直近7日）</h2>
         <!-- JavaScriptで棒グラフを自動生成して入れる場所です -->
@@ -141,18 +128,18 @@
   </div>
 
   <!-- 1. 市町村マスターデータを読み込みます -->
-  <script src="master.js?v=20261121c"></script>
+  <script src="master.js?v=20261122a"></script>
   <!-- 2. 保存データ管理を読み込みます -->
-  <script src="storage.js?v=20261121c"></script>
+  <script src="storage.js?v=20261122a"></script>
   <!-- 3. 計算・位置判定を読み込みます -->
-  <script src="logic.js?v=20261121c"></script>
+  <script src="logic.js?v=20261122a"></script>
   <!-- 4. 画面表示の更新担当を読み込みます -->
-  <script src="ui.js?v=20261121c"></script>
+  <script src="ui.js?v=20261122a"></script>
   <!-- 4.4 座標計算専用モジュールを読み込みます -->
-  <script src="map-calc.js?v=20261121c"></script>
+  <script src="map-calc.js?v=20261122a"></script>
   <!-- 4.5 地図描画モジュールを読み込みます -->
-  <script src="map.js?v=20261121c"></script>
+  <script src="map.js?v=20261122a"></script>
   <!-- 5. メイン制御を読み込みます -->
-  <script src="main.js?v=20261121c"></script>
+  <script src="main.js?v=20261122a"></script>
 </body>
 </html>
