@@ -5,63 +5,59 @@
   padding: 0;
 }
 
-/* 画面全体の背景色や文字フォントを設定し、全体のスクロールを防ぎます */
+/* 画面全体の背景色や文字フォントを設定し、自然な縦スクロールを許可します */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
   background-color: #f2f5f3;
   color: #333333;
-  line-height: 1.4;
-  overflow: hidden;
+  line-height: 1.5;
+  /* iPhoneの下部ホームバーに隠れないよう余白を確保します */
+  padding-bottom: 40px;
 }
 
-/* アプリ全体の横幅と高さをスマホ1画面（100dvh）にぴったり固定します */
+/* アプリ全体の横幅をスマホ向けに調整します */
 .app-container {
   max-width: 480px;
-  height: 100dvh;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  /* iPhoneの下部ホームバーに重ならないよう安全な余白を確保します */
-  padding-bottom: env(safe-area-inset-bottom, 8px);
 }
 
-/* 上部ヘッダーのデザインです（高さを抑えてスッキリさせます） */
+/* 上部ヘッダーのデザインです（旅らしい落ち着いた深緑色） */
 .app-header {
   background-color: #2e6f40;
   color: #ffffff;
-  padding: 8px 12px;
+  padding: 14px 16px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 /* ヘッダー内のタイトル文字サイズです */
 .app-header h1 {
-  font-size: 1.1rem;
-  margin-bottom: 2px;
+  font-size: 1.3rem;
+  margin-bottom: 4px;
 }
 
 /* ヘッダー内のコース名表示のスタイルです */
 .course-subtitle {
-  font-size: 0.78rem;
-  opacity: 0.92;
+  font-size: 0.85rem;
+  opacity: 0.9;
 }
 
-/* 3つのタブボタンを横並びに配置します */
+/* 3つのタブボタンを横並びに配置し、スクロール時も上部に固定します */
 .tab-nav {
   display: flex;
   background-color: #ffffff;
   border-bottom: 2px solid #dddddd;
-  flex-shrink: 0;
+  position: sticky;
+  top: 0;
   z-index: 10;
 }
 
 /* 各タブボタンの見た目です */
 .tab-btn {
   flex: 1;
-  padding: 9px 4px;
+  padding: 12px 4px;
   border: none;
   background: none;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: bold;
   color: #666666;
   cursor: pointer;
@@ -77,133 +73,99 @@ body {
 /* タブの中身（初期状態では非表示にしておきます） */
 .tab-content {
   display: none;
-  flex: 1;
-  padding: 8px;
-  overflow-y: auto;
+  padding: 12px;
 }
 
-/* 【画面1】記録・現在地タブはスクロールさせず1画面内に収めます */
-#tab-home.active {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow: hidden;
-}
-
-/* 【画面2・3】記録グラフと設定タブは中身が多い場合に内部スクロールさせます */
-#tab-history.active,
-#tab-settings.active {
+/* 選択中のタブの中身だけを表示します */
+.tab-content.active {
   display: block;
 }
 
 /* 情報をまとめる白いカードのデザインです */
 .card {
   background-color: #ffffff;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
-}
-
-/* 【画面1】内のカードは余白を詰めて高さを節約します */
-#tab-home .card {
-  margin-bottom: 0;
-  padding: 8px 10px;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* カード内の見出しデザインです */
 .card h2 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #2e6f40;
   border-left: 4px solid #2e6f40;
   padding-left: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-/* 励ましメッセージカードのコンパクトデザインです */
+/* 励ましメッセージカードの特別デザインです */
 .message-card {
   background-color: #fff9e6;
   border: 1px solid #f0d78c;
-  font-size: 0.82rem;
   font-weight: bold;
   color: #6b5300;
   text-align: center;
-  flex-shrink: 0;
 }
 
-/* 【画面1】のメインカード（到達地点＋地図）を画面の残り高さに広げます */
-.status-card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-/* 到達した市町村名と累計データを1行に並べるヘッダーです */
-.status-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-  flex-shrink: 0;
-}
-
-/* 到達した市町村名をコンパクトかつ目立たせます */
+/* 到達した市町村名を大きく目立たせます */
 .highlight-title {
-  font-size: 1.15rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #1f4e2c;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: center;
+  margin: 6px 0 12px;
 }
 
-/* 累計距離と累計歩数のバッジを並べる枠です */
-.stats-inline {
+/* 累計距離と累計歩数を横並びにする枠です */
+.stats-row {
   display: flex;
-  gap: 4px;
-  flex-shrink: 0;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-/* 距離・歩数の小さなバッジデザインです */
-.stat-badge {
+/* 距離・歩数それぞれの箱のデザインです */
+.stat-box {
+  flex: 1;
   background-color: #f4faf6;
-  border: 1px solid #d5e8dc;
-  border-radius: 6px;
-  padding: 2px 6px;
-  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+/* 距離・歩数のラベル文字です */
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #666666;
+}
+
+/* 距離・歩数の数値文字です */
+.stat-value {
+  font-size: 1.15rem;
   font-weight: bold;
   color: #2e6f40;
 }
 
-/* 名所・特産品を1行（または2列）でコンパクトに表示する枠です */
+/* 名所・特産品を表示する枠のデザインです */
 .spot-info {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
   background-color: #f9f9f9;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.76rem;
-  margin-bottom: 6px;
-  flex-shrink: 0;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
 }
 
-/* 名所・特産品が長すぎる場合に1行で綺麗に省略する設定です */
-.spot-info > span {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* 名所・特産品の行間を少し空けます */
+.spot-info p {
+  margin-bottom: 4px;
 }
 
-/* 地図を表示する枠（残りの高さいっぱいに自動伸縮します） */
+/* 地図を表示する枠のスタイルです */
 .route-map-box {
   position: relative;
-  flex: 1;
+  height: 300px;
   width: 100%;
-  min-height: 120px;
+  margin-top: 12px;
   border-radius: 8px;
   border: 1px solid #cccccc;
   background-color: #dce8f0;
@@ -211,49 +173,7 @@ body {
   user-select: none;
 }
 
-/* 【画面1】下部の歩数入力カードを固定配置します */
-.input-card {
-  flex-shrink: 0;
-}
-
-/* 日付・歩数・記録ボタンを横1列に並べる枠です */
-.input-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-/* 横並びの日付入力欄の調整です */
-.input-row input[type="date"] {
-  flex: 1.2;
-  min-width: 0;
-  padding: 8px 6px;
-  font-size: 0.85rem;
-  border: 1px solid #cccccc;
-  border-radius: 8px;
-  background-color: #ffffff;
-}
-
-/* 横並びの歩数入力欄の調整です */
-.input-row input[type="number"] {
-  flex: 1;
-  min-width: 0;
-  padding: 8px 8px;
-  font-size: 0.95rem;
-  border: 1px solid #cccccc;
-  border-radius: 8px;
-  background-color: #ffffff;
-}
-
-/* 横並び用のコンパクトな記録ボタンです */
-.compact-btn {
-  width: auto;
-  flex-shrink: 0;
-  padding: 8px 14px;
-  font-size: 0.9rem;
-}
-
-/* 【画面3】設定タブ用の入力フォームの1項目ごとの余白です */
+/* 入力フォームの1項目ごとの余白です */
 .form-group {
   margin-bottom: 14px;
 }
@@ -277,6 +197,26 @@ body {
   background-color: #ffffff;
 }
 
+/* 歩数入力欄と記録ボタンを横並びにする枠です */
+.steps-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+/* 横並び時の歩数入力欄の幅設定です */
+.steps-input-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 横並び時の記録ボタンの幅設定です */
+.steps-submit-btn {
+  width: auto;
+  flex-shrink: 0;
+  padding: 0 20px;
+}
+
 /* 補足説明の小さい文字です */
 .help-text {
   display: block;
@@ -288,12 +228,12 @@ body {
 /* メインの実行ボタン（緑色）のデザインです */
 .primary-btn {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background-color: #2e6f40;
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
 }

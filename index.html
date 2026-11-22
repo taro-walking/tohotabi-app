@@ -10,7 +10,7 @@
   <!-- ブラウザのタブやホーム画面に表示されるタイトルです -->
   <title>マイ・ウォーキング旅</title>
   <!-- 画面デザイン用ファイル（style.css）を読み込みます -->
-  <link rel="stylesheet" href="style.css?v=20261122a">
+  <link rel="stylesheet" href="style.css?v=20261122b">
 </head>
 <body>
 
@@ -40,37 +40,51 @@
     <!-- ========================================== -->
     <main id="tab-home" class="tab-content active">
 
-      <!-- 励ましメッセージを表示するコンパクトなカードです -->
+      <!-- 励ましメッセージを表示する目立つカードです -->
       <section class="card message-card">
         <p id="encouragement-msg">今日も一歩ずつ進みましょう！</p>
       </section>
 
-      <!-- 現在の到達地点と観光・物産情報、地図を表示するメインカードです -->
+      <!-- 現在の到達地点と観光・物産情報、地図を表示するカードです -->
       <section class="card status-card">
-        <!-- 到達地点名と累計データを1行にまとめて高さを節約します -->
-        <div class="status-header">
-          <div id="latest-point-name" class="highlight-title">---</div>
-          <div class="stats-inline">
-            <span id="total-km" class="stat-badge">0 km</span>
-            <span id="total-steps" class="stat-badge">0 歩</span>
+        <h2>現在の到達地点</h2>
+        <!-- 到達した市町村名を大きく表示します -->
+        <div id="latest-point-name" class="highlight-title">---</div>
+        <!-- 累計距離と累計歩数を並べて表示します -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">累計距離</span>
+            <span id="total-km" class="stat-value">0 km</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">累計歩数</span>
+            <span id="total-steps" class="stat-value">0 歩</span>
           </div>
         </div>
-        <!-- その街の名所と特産品をコンパクトに表示する枠です -->
+        <!-- その街の名所と特産品を表示する枠です -->
         <div class="spot-info">
-          <span><strong>🏯</strong> <span id="latest-spot">---</span></span>
-          <span><strong>🍱</strong> <span id="latest-specialty">---</span></span>
+          <p><strong>🏯 名所：</strong><span id="latest-spot">---</span></p>
+          <p><strong>🍱 特産：</strong><span id="latest-specialty">---</span></p>
         </div>
-        <!-- 拡大縮小・ピンタップができる地図を表示する枠です（高さはCSSで自動調整） -->
+        <!-- 拡大縮小・ピンタップができる地図を表示する枠です -->
         <div id="route-map" class="route-map-box"></div>
       </section>
 
-      <!-- 日々の歩数を手入力するコンパクトなカードです -->
+      <!-- 日々の歩数を手入力するカードです（確実に見える2段構成） -->
       <section class="card input-card">
-        <!-- 日付と歩数とボタンを横並びに配置して1画面に収めます -->
-        <div class="input-row">
-          <input type="date" id="input-date" aria-label="日付">
-          <input type="number" id="input-steps" inputmode="numeric" placeholder="歩数" aria-label="歩数">
-          <button id="btn-add-steps" class="primary-btn compact-btn">記録</button>
+        <h2>歩数を記録する</h2>
+        <!-- 1段目：日付を選ぶ入力欄です -->
+        <div class="form-group">
+          <label for="input-date">日付</label>
+          <input type="date" id="input-date">
+        </div>
+        <!-- 2段目：歩数入力と記録ボタンを並べて押しやすくします -->
+        <div class="form-group">
+          <label for="input-steps">歩数（歩）</label>
+          <div class="steps-input-row">
+            <input type="number" id="input-steps" inputmode="numeric" placeholder="例: 8000">
+            <button id="btn-add-steps" class="primary-btn steps-submit-btn">記録する</button>
+          </div>
         </div>
       </section>
 
@@ -80,7 +94,7 @@
     <!-- 【画面2】旅の記録・グラフタブ              -->
     <!-- ========================================== -->
     <section id="tab-history" class="tab-content">
-      <!-- 直近の歩数を棒グラフで表示するカードです -->
+      <!-- 直近7日間の歩数を棒グラフで表示するカードです -->
       <div class="card">
         <h2>日別歩数グラフ（直近7日）</h2>
         <!-- JavaScriptで棒グラフを自動生成して入れる場所です -->
@@ -128,18 +142,18 @@
   </div>
 
   <!-- 1. 市町村マスターデータを読み込みます -->
-  <script src="master.js?v=20261122a"></script>
+  <script src="master.js?v=20261122b"></script>
   <!-- 2. 保存データ管理を読み込みます -->
-  <script src="storage.js?v=20261122a"></script>
+  <script src="storage.js?v=20261122b"></script>
   <!-- 3. 計算・位置判定を読み込みます -->
-  <script src="logic.js?v=20261122a"></script>
+  <script src="logic.js?v=20261122b"></script>
   <!-- 4. 画面表示の更新担当を読み込みます -->
-  <script src="ui.js?v=20261122a"></script>
+  <script src="ui.js?v=20261122b"></script>
   <!-- 4.4 座標計算専用モジュールを読み込みます -->
-  <script src="map-calc.js?v=20261122a"></script>
+  <script src="map-calc.js?v=20261122b"></script>
   <!-- 4.5 地図描画モジュールを読み込みます -->
-  <script src="map.js?v=20261122a"></script>
+  <script src="map.js?v=20261122b"></script>
   <!-- 5. メイン制御を読み込みます -->
-  <script src="main.js?v=20261122a"></script>
+  <script src="main.js?v=20261122b"></script>
 </body>
 </html>
