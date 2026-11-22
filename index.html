@@ -10,7 +10,7 @@
   <!-- ブラウザのタブやホーム画面に表示されるタイトルです -->
   <title>マイ・ウォーキング旅</title>
   <!-- 画面デザイン用ファイル（style.css）を読み込みます -->
-  <link rel="stylesheet" href="style.css?v=20261122f">
+  <link rel="stylesheet" href="style.css?v=20261122h">
 </head>
 <body>
 
@@ -104,16 +104,23 @@
     <!-- 【画面2】旅の記録・グラフタブ              -->
     <!-- ========================================== -->
     <section id="tab-history" class="tab-content">
-      <!-- 直近の歩数を棒グラフで表示するカードです -->
+      <!-- 歩数推移を期間別（日・週・月・半年）に棒グラフ表示するカードです -->
       <div class="card">
-        <h2>日別歩数グラフ（直近7日）</h2>
+        <h2 id="chart-title">歩数グラフ（日別・直近7日）</h2>
+        <!-- グラフの表示期間を切り替える4つのボタンです -->
+        <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+          <button type="button" class="chart-mode-btn" data-mode="day" style="flex: 1; padding: 6px 2px; font-size: 0.78rem; font-weight: bold; border-radius: 6px; border: 1px solid #2e6f40; background: #2e6f40; color: #ffffff; cursor: pointer;">日別(7日)</button>
+          <button type="button" class="chart-mode-btn" data-mode="week" style="flex: 1; padding: 6px 2px; font-size: 0.78rem; font-weight: bold; border-radius: 6px; border: 1px solid #cccccc; background: #ffffff; color: #333333; cursor: pointer;">週別(7週)</button>
+          <button type="button" class="chart-mode-btn" data-mode="month" style="flex: 1; padding: 6px 2px; font-size: 0.78rem; font-weight: bold; border-radius: 6px; border: 1px solid #cccccc; background: #ffffff; color: #333333; cursor: pointer;">月別(6ヶ月)</button>
+          <button type="button" class="chart-mode-btn" data-mode="half" style="flex: 1; padding: 6px 2px; font-size: 0.78rem; font-weight: bold; border-radius: 6px; border: 1px solid #cccccc; background: #ffffff; color: #333333; cursor: pointer;">半年別</button>
+        </div>
         <!-- JavaScriptで棒グラフを自動生成して入れる場所です -->
         <div id="step-chart" class="chart-container">
           <p class="empty-text">まだ記録がありません</p>
         </div>
       </div>
 
-      <!-- コース内の全地点と到達状況の一覧を表示するカードです -->
+      <!-- コース内の全地点と到達状況・到達日付けの一覧を表示するカードです -->
       <div class="card">
         <h2>コース通過チェックリスト</h2>
         <!-- JavaScriptで地点リストを自動生成して入れる場所です -->
@@ -142,31 +149,42 @@
         <button id="btn-save-settings" class="primary-btn">設定を保存する</button>
       </div>
 
-      <!-- データを初期化する危険操作用のカードです -->
+      <!-- データのバックアップ保存・復元・初期化を行うカードです -->
       <div class="card danger-card">
-        <h2>データ管理</h2>
-        <button id="btn-reset-data" class="danger-btn">すべての記録をリセットする</button>
+        <h2>データ管理（保存・復元・初期化）</h2>
+        <!-- 現在の歩数記録をJSONファイルに保存するボタンです -->
+        <button type="button" id="btn-export-data" class="primary-btn" style="margin-bottom: 10px;">
+          💾 データをファイルに保存（バックアップ）
+        </button>
+        <!-- 保存したJSONファイルから復元するボタンです -->
+        <button type="button" id="btn-import-data" style="width: 100%; padding: 12px; margin-bottom: 14px; background-color: #f4faf6; color: #2e6f40; border: 1px solid #2e6f40; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer;">
+          📂 バックアップファイルから復元
+        </button>
+        <!-- ファイル選択ダイアログ用の隠れた入力部品です -->
+        <input type="file" id="input-import-file" accept=".json,application/json" style="display: none;">
+        <!-- データをすべて消去する初期化ボタンです -->
+        <button type="button" id="btn-reset-data" class="danger-btn">すべての記録をリセットする</button>
       </div>
     </section>
 
   </div>
 
   <!-- 1. 市町村マスターデータを読み込みます -->
-  <script src="master.js?v=20261122f"></script>
+  <script src="master.js?v=20261122h"></script>
   <!-- 2. 保存データ管理を読み込みます -->
-  <script src="storage.js?v=20261122f"></script>
+  <script src="storage.js?v=20261122h"></script>
   <!-- 3. 計算・位置判定を読み込みます -->
-  <script src="logic.js?v=20261122f"></script>
+  <script src="logic.js?v=20261122h"></script>
   <!-- 4. 画面表示の更新担当を読み込みます -->
-  <script src="ui.js?v=20261122f"></script>
+  <script src="ui.js?v=20261122h"></script>
   <!-- 4.4 座標計算専用モジュールを読み込みます -->
-  <script src="map-calc.js?v=20261122f"></script>
+  <script src="map-calc.js?v=20261122h"></script>
   <!-- 4.5 地図HTML生成モジュールを読み込みます -->
-  <script src="map-html.js?v=20261122f"></script>
+  <script src="map-html.js?v=20261122h"></script>
   <!-- 4.6 地図描画・操作モジュールを読み込みます -->
-  <script src="map.js?v=20261122f"></script>
+  <script src="map.js?v=20261122h"></script>
   <!-- 5. メイン制御を読み込みます -->
-  <script src="main.js?v=20261122f"></script>
+  <script src="main.js?v=20261122h"></script>
 </body>
 </html>
 <!-- --- index.html ここまで --- -->

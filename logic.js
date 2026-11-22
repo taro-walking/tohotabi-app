@@ -1,132 +1,230 @@
-// 計算・位置判定の機能をひとまとめにしたオブジェクト（部品）を作成します
+// 計算・位置判定・期間別集計を担当するモジュールです
 const WalkLogic = {
 
-  // 【機能1】累計歩数と歩幅(cm)から、累計歩行距離(km)を計算する関数
+  // 【機能1】累計歩数と歩幅(cm)から累計歩行距離(km)を計算する関数です
   calculateDistanceKm: function(totalSteps, strideCm) {
-    // 歩数に歩幅(cm)を掛けて、総移動距離をセンチメートル単位で出します
+    // 歩数に歩幅(cm)を掛けて総移動距離(cm)を出します
     const totalCm = totalSteps * strideCm;
-    // 1km = 100,000cm なので、100,000で割ってキロメートルに換算します
+    // 100,000で割ってキロメートルに換算します
     const rawKm = totalCm / 100000;
-    // 小数点第2位まで表示するために、100倍して四捨五入してから100で割ります
+    // 小数点第2位までに丸めて返します
     return Math.round(rawKm * 100) / 100;
   },
 
-  // 【機能2】現在のコースと累計距離から、到達状況や次の目的地を判定する関数
+  // 【機能2】現在のコースと累計距離から到達状況や次の目的地を判定する関数です
   evaluateProgress: function(courseId, totalSteps, strideCm) {
-    // 選択されたコースのマスターデータを取得します（見つからない場合はcourse1を使います）
-    const course = MASTER_DATA[courseId] || MASTER_DATA['course1'];
-    // コース内の通過地点リスト（配列）を取り出します
+    // 選択されたコースのマスターデータを取得します
+    const course = Reflect.get(MASTER_DATA, courseId) || MASTER_DATA.course1;
     const points = course.points;
     // 現在の累計歩行距離(km)を計算します
     const currentKm = this.calculateDistanceKm(totalSteps, strideCm);
 
-    // すでに通過（到達）した地点を入れるための空リストを用意します
-    const passedPoints = [];
-    // 次に目指す地点を入れておく変数を用意します（最初はnull＝未設定）
+    // 通過済み地点リストと次の目的地を用意します
+    const passedPoints = new Array();
     let nextPoint = null;
 
-    // スタート地点からゴール地点まで、1つずつ順番に距離をチェックします（ループ処理）
+    // スタート地点からゴール地点まで順番に距離をチェックします
     for (let i = 0; i < points.length; i++) {
-      // i番目の地点データを取り出します
-      const point = points[i];
-      // 現在の累計距離が、その地点の基準距離(km)以上かどうか判定します
+      const point = points.at(i);
+      if (!point) {
+        continue;
+      }
       if (currentKm >= point.km) {
-        // 到達しているので、通過済みリストに追加します（通り過ぎてもすべて記録されます）
         passedPoints.push(point);
       } else {
-        // まだ到達していない最初の地点が見つかったら、それを「次の目的地」にセットします
         nextPoint = point;
-        // これ以降の地点も未到達なので、ループを終了します
         break;
       }
     }
 
-    // 通過済みリストの「一番最後の要素」を、現在到達している最新地点として取り出します
-    const latestPoint = passedPoints[passedPoints.length - 1];
-    // ゴール地点（リストの最後の地点）のデータを取得します
-    const goalPoint = points[points.length - 1];
-    // 現在の距離がゴール距離以上なら「ゴール達成（true）」と判定します
+    // 最新到達地点とゴール地点を取得します
+    const latestPoint = passedPoints.at(passedPoints.length - 1);
+    const goalPoint = points.at(points.length - 1);
     const isGoal = currentKm >= goalPoint.km;
 
-    // 次の目的地までの残り距離(km)と残り歩数を計算するための変数を初期値0で用意します
+    // 次の目的地までの残り距離と残り歩数を計算します
     let remainingKm = 0;
     let remainingSteps = 0;
-
-    // まだゴールしておらず、次の目的地が存在する場合の計算です
     if (!isGoal && nextPoint) {
-      // 次の地点までの距離から現在距離を引き、小数点第2位までに丸めます
       remainingKm = Math.round((nextPoint.km - currentKm) * 100) / 100;
-      // 残り距離(km)をセンチメートルに直し、歩幅(cm)で割って切り上げ（Math.ceil）します
       remainingSteps = Math.ceil((remainingKm * 100000) / strideCm);
     }
 
-    // 計算と判定の結果を1つのオブジェクトにまとめて呼び出し元に返します
+    // 計算と判定の結果をまとめて返します
     return {
-      // コース名（例：「① 宮城県内ルート（仙台〜気仙沼）」）
       courseName: course.name,
-      // 現在の累計距離(km)
       currentKm: currentKm,
-      // ゴールまでの総距離(km)
       goalKm: goalPoint.km,
-      // 通過済みの全地点リスト（配列）
       passedPoints: passedPoints,
-      // 一番新しく到達した地点のデータ（名所や特産品もここに入っています）
       latestPoint: latestPoint,
-      // 次に目指す地点のデータ（ゴール済みの場合は null）
       nextPoint: nextPoint,
-      // ゴール済みかどうかのフラグ（true または false）
       isGoal: isGoal,
-      // 次の地点までの残り距離(km)
       remainingKm: remainingKm,
-      // 次の地点までの残り歩数
       remainingSteps: remainingSteps
     };
   },
 
-  // 【機能3】判定結果をもとに、画面に表示する「励ましメッセージ」を作成する関数
+  // 【機能3】判定結果をもとに励ましメッセージを作成する関数です
   createEncouragementMessage: function(progress) {
-    // もしゴールを達成していた場合のお祝いメッセージです
     if (progress.isGoal) {
-      // ゴール地点の名前を含めた達成メッセージを返します
-      return 'おめでとうございます！「' + progress.latestPoint.name + '」に到達し、コースを完全制覇しました！';
+      const name = progress.latestPoint.name;
+      return 'おめでとうございます！「' + name + '」に到達し、コースを完全制覇しました！';
     }
-    // まだ途中の場合は、次の地点名と残り歩数・残り距離を組み合わせたメッセージを返します
-    return '次の目的地「' + progress.nextPoint.name + '」まで、あと ' + progress.remainingSteps.toLocaleString() + ' 歩（' + progress.remainingKm + ' km）です！';
+    const nextName = progress.nextPoint.name;
+    const stepsStr = progress.remainingSteps.toLocaleString();
+    const kmStr = progress.remainingKm;
+    return '次の目的地「' + nextName + '」まで、あと ' + stepsStr + ' 歩（' + kmStr + ' km）です！';
   },
 
-  // 【機能4】歩数履歴の配列から、日別の合計歩数データを集計する関数（グラフ表示用）
+  // 【機能4】各地点に何月何日に到達したかを履歴から逆算する関数です
+  calcPointReachedDates: function(courseId, history, strideCm) {
+    const course = Reflect.get(MASTER_DATA, courseId) || MASTER_DATA.course1;
+    const points = course.points;
+    // 地点IDごとの到達日付を入れる箱です
+    const reachedMap = {};
+
+    // 履歴を日付順（古い→新しい）に並べ替えたコピーを作ります
+    const sorted = history.slice().sort(function(a, b) {
+      return a.date.localeCompare(b.date);
+    });
+
+    // 履歴が1件も無ければ空のまま返します
+    if (sorted.length === 0) {
+      return reachedMap;
+    }
+
+    // 履歴を古い順に足し上げながら各地点の基準距離を超えた日を特定します
+    let accSteps = 0;
+    for (let i = 0; i < sorted.length; i++) {
+      const rec = sorted.at(i);
+      if (!rec) {
+        continue;
+      }
+      accSteps += rec.steps;
+      const accKm = this.calculateDistanceKm(accSteps, strideCm);
+
+      for (let j = 0; j < points.length; j++) {
+        const pt = points.at(j);
+        if (!pt) {
+          continue;
+        }
+        const key = String(pt.id);
+        // まだ到達日が未記録で、累計距離が地点距離に達していれば日付を記録します
+        if (!Reflect.get(reachedMap, key) && accKm >= pt.km) {
+          Reflect.set(reachedMap, key, rec.date);
+        }
+      }
+    }
+    return reachedMap;
+  },
+
+  // 【機能5】日別の合計歩数データを集計する基本関数です
   aggregateDailySteps: function(history, maxDays) {
-    // 日付をキーにして歩数を合算するための空の箱（連想配列）を用意します
     const dailyMap = {};
 
     // 履歴データを1件ずつ取り出して日付ごとに足し算します
     for (let i = 0; i < history.length; i++) {
-      // i番目の記録を取り出します
-      const record = history[i];
-      // まだその日付の箱がなければ、0で初期化します
-      if (!dailyMap[record.date]) {
-        // 初期値0をセットします
-        dailyMap[record.date] = 0;
+      const record = history.at(i);
+      if (!record) {
+        continue;
       }
-      // その日付の歩数に今回の歩数を加算します
-      dailyMap[record.date] += record.steps;
+      const prev = Reflect.get(dailyMap, record.date) || 0;
+      Reflect.set(dailyMap, record.date, prev + record.steps);
     }
 
-    // 合算した日付の一覧を取り出し、日付順（古い→新しい）に並べ替えます
+    // 日付順（古い→新しい）に並べ替えます
     const sortedDates = Object.keys(dailyMap).sort();
-
-    // 表示する最大日数（例：直近7日分）が指定されていれば、後ろからその日数分だけ切り出します
     const targetDates = maxDays ? sortedDates.slice(-maxDays) : sortedDates;
 
-    // グラフ描画で使いやすい「{ date: 日付, steps: 合計歩数 }」のリストに作り直して返します
-    return targetDates.map(function(dateStr) {
-      // 1日分のオブジェクトを返します
-      return {
-        // 日付文字列（例："2026-11-21"）
-        date: dateStr,
-        // その日の合計歩数
-        steps: dailyMap[dateStr]
-      };
-    });
+    // グラフ表示用の配列に作り直して返します
+    const result = new Array();
+    for (let i = 0; i < targetDates.length; i++) {
+      const dStr = targetDates.at(i);
+      const shortLabel = dStr.slice(5).replace('-', '/');
+      result.push({
+        label: shortLabel,
+        date: dStr,
+        steps: Reflect.get(dailyMap, dStr) || 0
+      });
+    }
+    return result;
+  },
+
+  // 【機能6】指定された期間モード（day / week / month / half）で歩数を集計する関数です
+  aggregateByPeriod: function(history, mode) {
+    // 日別（直近7日）の場合は既存の関数をそのまま使います
+    if (mode === 'day' || !mode) {
+      return this.aggregateDailySteps(history, 7);
+    }
+
+    // 期間キーごとに歩数を合算するための箱です
+    const groupMap = {};
+
+    for (let i = 0; i < history.length; i++) {
+      const rec = history.at(i);
+      if (!rec || !rec.date) {
+        continue;
+      }
+      const parts = rec.date.split('-');
+      if (parts.length !== 3) {
+        continue;
+      }
+      const y = Number(parts.at(0));
+      const m = Number(parts.at(1));
+      const d = Number(parts.at(2));
+
+      let key = '';
+      if (mode === 'week') {
+        // その週の月曜日の日付をキーにします
+        const dt = new Date(y, m - 1, d);
+        const dayOfWeek = dt.getDay();
+        const diffToMon = (dayOfWeek === 0) ? -6 : (1 - dayOfWeek);
+        dt.setDate(dt.getDate() + diffToMon);
+        const wy = dt.getFullYear();
+        const wm = String(dt.getMonth() + 1).padStart(2, '0');
+        const wd = String(dt.getDate()).padStart(2, '0');
+        key = wy + '-' + wm + '-' + wd;
+      } else if (mode === 'month') {
+        // 年月（YYYY-MM）をキーにします
+        key = parts.at(0) + '-' + parts.at(1);
+      } else if (mode === 'half') {
+        // 半期（YYYY-1上期 / YYYY-2下期）をキーにします
+        const halfCode = (m <= 6) ? '1' : '2';
+        key = parts.at(0) + '-' + halfCode;
+      }
+
+      if (key) {
+        const prev = Reflect.get(groupMap, key) || 0;
+        Reflect.set(groupMap, key, prev + rec.steps);
+      }
+    }
+
+    // キーを古い順に並べ、表示件数を絞ります
+    const sortedKeys = Object.keys(groupMap).sort();
+    const limit = (mode === 'half') ? 6 : 7;
+    const targetKeys = sortedKeys.slice(-limit);
+
+    // グラフ用のラベルと合計歩数の配列にして返します
+    const result = new Array();
+    for (let i = 0; i < targetKeys.length; i++) {
+      const k = targetKeys.at(i);
+      let label = k;
+      if (mode === 'week') {
+        label = k.slice(5).replace('-', '/') + '週';
+      } else if (mode === 'month') {
+        label = k.slice(2, 4) + '/' + Number(k.slice(5)) + '月';
+      } else if (mode === 'half') {
+        const yy = k.slice(2, 4);
+        const term = k.endsWith('1') ? '上期' : '下期';
+        label = yy + term;
+      }
+      result.push({
+        label: label,
+        date: k,
+        steps: Reflect.get(groupMap, k) || 0
+      });
+    }
+    return result;
   }
 };
+// --- logic.js ここまで ---

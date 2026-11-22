@@ -2,7 +2,7 @@
 const UIManager = {
 
   // 【機能1】アプリ全体の画面を最新のデータで描き直す関数です
-  renderAll: function(data, progress, message, dailySummary) {
+  renderAll: function(data, progress, message, chartSummary, chartMode) {
     // 1. ヘッダーのコース名を書き換えます
     const headerEl = document.getElementById('header-course-name');
     headerEl.textContent = progress.courseName;
@@ -35,67 +35,116 @@ const UIManager = {
       }
     }
 
-    // 6. 日別歩数グラフを描画します
-    this.renderChart(dailySummary);
+    // 6. 期間別の歩数グラフと切り替えボタンを描画します
+    const mode = chartMode || 'day';
+    this.updateChartButtons(mode);
+    this.renderChart(chartSummary, mode);
 
-    // 7. コース通過チェックリストを描画します
-    this.renderPointList(data.currentCourseId, progress.currentKm);
+    // 7. コース通過チェックリスト（到達日付け付き）を描画します
+    const reachedMap = WalkLogic.calcPointReachedDates(
+      data.currentCourseId,
+      data.history,
+      data.strideCm
+    );
+    this.renderPointList(data.currentCourseId, progress.currentKm, reachedMap);
 
     // 8. 設定画面の選択状態（コースと歩幅）を反映させます
     document.getElementById('select-course').value = data.currentCourseId;
     document.getElementById('input-stride').value = data.strideCm;
   },
 
-  // 【機能2】直近7日間の日別歩数グラフを描画する関数です
-  renderChart: function(dailySummary) {
+  // 【機能2-1】グラフ期間切替ボタンの見た目とタイトルを更新する関数です
+  updateChartButtons: function(mode) {
+    const titleEl = document.getElementById('chart-title');
+    if (titleEl) {
+      if (mode === 'week') {
+        titleEl.textContent = '歩数グラフ（週別・直近7週）';
+      } else if (mode === 'month') {
+        titleEl.textContent = '歩数グラフ（月別・直近6ヶ月）';
+      } else if (mode === 'half') {
+        titleEl.textContent = '歩数グラフ（半年別推移）';
+      } else {
+        titleEl.textContent = '歩数グラフ（日別・直近7日）';
+      }
+    }
+
+    // 選択中のボタンだけを緑色にし、他を白色に戻します
+    const btns = document.querySelectorAll('.chart-mode-btn');
+    for (let i = 0; i < btns.length; i++) {
+      const btn = btns.item(i);
+      const bMode = btn.getAttribute('data-mode');
+      if (bMode === mode) {
+        btn.style.background = '#2e6f40';
+        btn.style.color = '#ffffff';
+        btn.style.borderColor = '#2e6f40';
+      } else {
+        btn.style.background = '#ffffff';
+        btn.style.color = '#333333';
+        btn.style.borderColor = '#cccccc';
+      }
+    }
+  },
+
+  // 【機能2-2】期間別の歩数グラフを描画する関数です
+  renderChart: function(summaryList, mode) {
     // グラフを表示するHTMLの箱を取得します
     const container = document.getElementById('step-chart');
     container.innerHTML = '';
 
     // まだ記録が1件もない場合は案内メッセージを表示します
-    if (dailySummary.length === 0) {
+    if (!summaryList || summaryList.length === 0) {
       container.innerHTML = '<p class="empty-text">まだ記録がありません</p>';
       return;
     }
 
+    // 期間モードに応じた最小基準歩数を設定します
+    let baseMax = 10000;
+    if (mode === 'week') {
+      baseMax = 50000;
+    } else if (mode === 'month') {
+      baseMax = 200000;
+    } else if (mode === 'half') {
+      baseMax = 1000000;
+    }
+
     // グラフの高さを揃えるため最大歩数を探します
-    let maxSteps = 10000;
-    for (let i = 0; i < dailySummary.length; i++) {
-      const item = dailySummary.at(i);
+    let maxSteps = baseMax;
+    for (let i = 0; i < summaryList.length; i++) {
+      const item = summaryList.at(i);
       if (item && item.steps > maxSteps) {
         maxSteps = item.steps;
       }
     }
 
-    // 1日分ずつ棒グラフのパーツを作って追加します
-    for (let i = 0; i < dailySummary.length; i++) {
-      const item = dailySummary.at(i);
+    // 1本ずつ棒グラフのパーツを作って追加します
+    for (let i = 0; i < summaryList.length; i++) {
+      const item = summaryList.at(i);
       if (!item) {
         continue;
       }
       // 棒の高さ（最大100px）を計算します
-      const barHeight = Math.round((item.steps / maxSteps) * 100);
-      // 日付文字列 "2026-11-22" から "11/22" を抜き出します
-      const shortDate = item.date.slice(5).replace('-', '/');
+      const barHeight = Math.max(4, Math.round((item.steps / maxSteps) * 100));
+      // ラベル文字列を取得します（無い場合は日付から生成します）
+      const labelText = item.label || item.date.slice(5).replace('-', '/');
 
-      // 1日分の列を作るdiv要素を作成します
+      // 1本分の列を作るdiv要素を作成します
       const col = document.createElement('div');
       col.className = 'chart-bar-item';
 
-      // 歩数ラベル・緑色の棒・日付ラベルを組み立てます
+      // 歩数ラベル・緑色の棒・期間ラベルを組み立てます
       let html = '<span class="chart-val">';
       html += item.steps.toLocaleString() + '</span>';
       html += '<div class="chart-bar" style="height: ';
       html += barHeight + 'px;"></div>';
-      html += '<span class="chart-date">' + shortDate + '</span>';
+      html += '<span class="chart-date">' + labelText + '</span>';
       col.innerHTML = html;
 
       container.appendChild(col);
     }
   },
 
-  // 【機能3】コース内の全地点と到達状況の一覧を描画する関数です
-  renderPointList: function(courseId, currentKm) {
+  // 【機能3】コース内の全地点と到達状況・到達日付けを描画する関数です
+  renderPointList: function(courseId, currentKm, reachedMap) {
     // リストを表示するul要素を取得します
     const listEl = document.getElementById('point-list');
     listEl.innerHTML = '';
@@ -103,6 +152,7 @@ const UIManager = {
     // 選択中のコースの地点リストを取得します
     const course = Reflect.get(MASTER_DATA, courseId) || MASTER_DATA.course1;
     const points = course.points;
+    const dateMap = reachedMap || {};
 
     // 各地点を1行ずつリストに追加します
     for (let i = 0; i < points.length; i++) {
@@ -112,15 +162,23 @@ const UIManager = {
       }
       // 現在の累計距離が地点の距離以上なら到達済みと判定します
       const isPassed = currentKm >= pt.km;
+      // 到達日付（例: "2026-11-22"）があればスラッシュ形式に変換します
+      const rawDate = Reflect.get(dateMap, String(pt.id));
+      const dateStr = rawDate ? rawDate.replace(/-/g, '/') : '';
 
       // 1行分のli要素を作成します
       const li = document.createElement('li');
       li.className = isPassed ? 'point-item passed' : 'point-item';
 
-      // 右側に表示するステータス文字を決めます
-      const statusText = isPassed
-        ? '✅ 到達済（' + pt.km + 'km）'
-        : '未到達（' + pt.km + 'km）';
+      // 右側に表示するステータス文字（到達日付け＋距離）を決めます
+      let statusText = '未到達（' + pt.km + 'km）';
+      if (isPassed) {
+        if (dateStr) {
+          statusText = '✅ ' + dateStr + '（' + pt.km + 'km）';
+        } else {
+          statusText = '✅ 到達済（' + pt.km + 'km）';
+        }
+      }
 
       // 左側に街の名前、右側にステータスを配置します
       li.innerHTML = '<span>' + pt.name + '</span><span>' + statusText + '</span>';
