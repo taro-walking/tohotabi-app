@@ -74,46 +74,49 @@ const MapHtml = {
 
       // 画面付近にあるピンだけHTML化します
       if (x >= -20 && x <= width + 20 && y >= -20 && y <= height + 20) {
-        const bg = isLatest ? '#ff3b30' : (isPassed ? '#2e6f40' : '#777');
-        const sz = isLatest ? 20 : 14;
+        // 現在地は赤、通過済みは緑、これからのポイントは鮮やかな黄色にします
+        const bg = isLatest ? '#ff3b30' : (isPassed ? '#2e6f40' : '#ffcc00');
+        // 選択中のピンは青い太枠で強調し、黄色いピンは黒枠でくっきりさせます
+        const bd = isSel ? '#007aff' : ((!isLatest && !isPassed) ? '#333333' : '#ffffff');
+        const sz = isSel ? 22 : (isLatest ? 20 : 14);
         const off = sz / 2;
-        const zIdx = isLatest ? 4 : 3;
+        const zIdx = isSel ? 5 : (isLatest ? 4 : 3);
 
         // タップ可能な丸いピンボタンです
         pins += '<button type="button" data-point-id="' + pt.id + '" ';
         pins += 'style="position:absolute; left:' + (x - off) + 'px; ';
         pins += 'top:' + (y - off) + 'px; width:' + sz + 'px; ';
         pins += 'height:' + sz + 'px; border-radius:50%; ';
-        pins += 'background:' + bg + '; border:2px solid #fff; ';
+        pins += 'background:' + bg + '; border:2.5px solid ' + bd + '; ';
         pins += 'z-index:' + zIdx + '; padding:0; cursor:pointer;">';
         pins += '</button>';
 
-        // 地名ラベルです
-        const fw = isLatest ? 'bold' : 'normal';
-        const col = isLatest ? '#d93025' : '#111111';
-        pins += '<div style="position:absolute; ';
-        pins += 'left:' + (x + off + 4) + 'px; top:' + (y - 8) + 'px; ';
-        pins += 'font-size:11px; font-weight:' + fw + '; ';
-        pins += 'color:' + col + '; background:rgba(255,255,255,0.8); ';
-        pins += 'padding:0 3px; border-radius:3px; ';
-        pins += 'pointer-events:none; white-space:nowrap; z-index:3;">';
-        pins += pt.name + '</div>';
-
-        // 選択中の吹き出しです
-        if (isSel) {
-          const pLeft = Math.max(8, Math.min(width - 190, x - 90));
-          const pTop = (y < 95) ? (y + off + 8) : (y - off - 78);
-          popup += '<div style="position:absolute; ';
-          popup += 'left:' + pLeft + 'px; top:' + pTop + 'px; ';
-          popup += 'width:182px; background:rgba(255,255,255,0.96); ';
-          popup += 'border:1px solid #2e6f40; border-radius:8px; ';
-          popup += 'padding:6px 8px; font-size:11px; z-index:6; ';
-          popup += 'pointer-events:none;">';
-          popup += '<div style="font-weight:bold; color:#2e6f40;">';
-          popup += pt.name + ' (' + pt.km + 'km)</div>';
-          popup += '<div>🏯 ' + pt.spot + '</div>';
-          popup += '<div>🍱 ' + pt.specialty + '</div></div>';
+        // 現在地または拡大時（ズーム11以上）のみ地名ラベルを表示します
+        if (isLatest || zoom >= 11) {
+          const fw = isLatest ? 'bold' : 'normal';
+          const col = isLatest ? '#d93025' : '#111111';
+          pins += '<div style="position:absolute; ';
+          pins += 'left:' + (x + off + 4) + 'px; top:' + (y - 8) + 'px; ';
+          pins += 'font-size:11px; font-weight:' + fw + '; ';
+          pins += 'color:' + col + '; background:rgba(255,255,255,0.85); ';
+          pins += 'padding:0 3px; border-radius:3px; ';
+          pins += 'pointer-events:none; white-space:nowrap; z-index:3;">';
+          pins += pt.name + '</div>';
         }
+      }
+
+      // 選択中の地点情報は隣接ピンを隠さないよう地図下部の固定位置に表示します
+      if (isSel) {
+        popup = '<div style="position:absolute; left:8px; right:8px; ';
+        popup += 'bottom:44px; background:rgba(255,255,255,0.96); ';
+        popup += 'border:1.5px solid #2e6f40; border-radius:8px; ';
+        popup += 'padding:6px 10px; font-size:11px; z-index:6; ';
+        popup += 'box-shadow:0 2px 6px rgba(0,0,0,0.2); ';
+        popup += 'pointer-events:none;">';
+        popup += '<div style="font-weight:bold; color:#2e6f40;">';
+        popup += pt.name + ' (' + pt.km + 'km)</div>';
+        popup += '<div>🏯 ' + pt.spot + '</div>';
+        popup += '<div>🍱 ' + pt.specialty + '</div></div>';
       }
     }
 
