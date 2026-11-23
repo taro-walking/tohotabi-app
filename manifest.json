@@ -1,0 +1,15 @@
+{
+  "name": "徒歩旅 - マイ・ウォーキング旅",
+  "short_name": "徒歩旅",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4faf6",
+  "theme_color": "#2e6f40",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
