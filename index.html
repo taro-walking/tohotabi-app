@@ -10,7 +10,7 @@
   <!-- ブラウザのタブやホーム画面に表示されるタイトルです -->
   <title>マイ・ウォーキング旅</title>
   <!-- 画面デザイン用ファイル（style.css）を読み込みます -->
-  <link rel="stylesheet" href="style.css?v=20261122h">
+  <link rel="stylesheet" href="style.css?v=20261123a">
 </head>
 <body>
 
@@ -134,7 +134,7 @@
     <section id="tab-settings" class="tab-content">
       <div class="card">
         <h2>コースと歩幅の設定</h2>
-        <!-- 3つのコースから選ぶプルダウンメニューです -->
+        <!-- コースから選ぶプルダウンメニューです -->
         <div class="form-group">
           <label for="select-course">歩くコースを選択</label>
           <select id="select-course"></select>
@@ -169,22 +169,26 @@
 
   </div>
 
-  <!-- 1. 市町村マスターデータを読み込みます -->
-  <script src="master.js?v=20261122h"></script>
+  <!-- 1-1. コース1（三陸ルート）の個別データを読み込みます -->
+  <script src="course1.js?v=20261123a"></script>
+  <!-- 1-2. コース2（東海道五十三次）の個別データを読み込みます -->
+  <script src="course2.js?v=20261123a"></script>
+  <!-- 1-3. 各コースデータをまとめる目次（master.js）を読み込みます -->
+  <script src="master.js?v=20261123a"></script>
   <!-- 2. 保存データ管理を読み込みます -->
-  <script src="storage.js?v=20261122h"></script>
+  <script src="storage.js?v=20261123a"></script>
   <!-- 3. 計算・位置判定を読み込みます -->
-  <script src="logic.js?v=20261122h"></script>
+  <script src="logic.js?v=20261123a"></script>
   <!-- 4. 画面表示の更新担当を読み込みます -->
-  <script src="ui.js?v=20261122h"></script>
+  <script src="ui.js?v=20261123a"></script>
   <!-- 4.4 座標計算専用モジュールを読み込みます -->
-  <script src="map-calc.js?v=20261122h"></script>
+  <script src="map-calc.js?v=20261123a"></script>
   <!-- 4.5 地図HTML生成モジュールを読み込みます -->
-  <script src="map-html.js?v=20261122h"></script>
+  <script src="map-html.js?v=20261123a"></script>
   <!-- 4.6 地図描画・操作モジュールを読み込みます -->
-  <script src="map.js?v=20261122h"></script>
+  <script src="map.js?v=20261123a"></script>
   <!-- 5. メイン制御を読み込みます -->
-  <script src="main.js?v=20261122h"></script>
+  <script src="main.js?v=20261123a"></script>
 </body>
 </html>
 <!-- --- index.html ここまで --- -->
