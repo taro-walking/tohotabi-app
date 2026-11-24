@@ -1,124 +1,142 @@
-// アプリ全体の司令塔となる処理です。画面読み込み完了時に動き始めます
+// 画面の読み込みが完了したらアプリ全体の初期設定を開始します
 document.addEventListener('DOMContentLoaded', function() {
-
-  // 現在選択中のグラフ期間モード（day / week / month / half）を保持します
+  // 歩数グラフの現在の表示モード（初期値は日別 'day'）を保持します
   let currentChartMode = 'day';
 
-  // 【共通処理】最新データを読み込み、計算して、画面全体と地図を描画する関数です
+  // 【共通関数】最新データを読み込み、画面と地図をまとめて再描画します
   function refreshApp() {
-    // 1. StorageManagerから現在の保存データを読み込みます
-    const currentData = StorageManager.loadData();
-    // 2. WalkLogicで現在の進行状況（距離・到達地点・次の目的地）を計算します
+    // 1. 保存データを読み込みます
+    const data = StorageManager.loadData();
+    // 2. 選択中コース専用の累計歩数と履歴を取り出します
+    const cStats = StorageManager.getCourseStats(data.currentCourseId, data);
+    // 3. 選択中コース専用の歩数と歩幅から進行状況を判定します
     const progress = WalkLogic.evaluateProgress(
-      currentData.currentCourseId,
-      currentData.totalSteps,
-      currentData.strideCm
+      data.currentCourseId,
+      cStats.totalSteps,
+      data.strideCm
     );
-    // 3. 励ましメッセージを生成します
+    // 4. 励ましメッセージを作成します
     const message = WalkLogic.createEncouragementMessage(progress);
-    // 4. 選択中の期間モード（日・週・月・半年）で歩数を集計します
+    // 5. 全コース共通の履歴から期間別の歩数グラフ用データを集計します
     const chartSummary = WalkLogic.aggregateByPeriod(
-      currentData.history,
+      data.history,
       currentChartMode
     );
-
-    // 5. UIManagerにすべての結果を渡して画面を最新の状態に書き換えます
-    UIManager.renderAll(
-      currentData,
-      progress,
-      message,
-      chartSummary,
-      currentChartMode
-    );
-
-    // 6. MapManagerに現在のコースと進行状況を渡して地図を更新します
-    MapManager.updateMap(currentData.currentCourseId, progress);
+    // 6. 画面全体の表示を更新します
+    UIManager.renderAll(data, progress, message, chartSummary, currentChartMode);
+    // 7. 地図の描画とピン位置を更新します
+    MapManager.updateMap(data.currentCourseId, progress);
   }
 
-  // --- アプリ起動時の初期セットアップ ---
-  // 設定画面のコース選択肢をマスターデータから自動生成します
+  // アプリ起動時の初期セットアップを実行します
   UIManager.initCourseOptions();
-  // 日付入力欄に今日の日付と曜日を自動セットします
   UIManager.setTodayDate();
-  // 初回の画面描画を実行します
   refreshApp();
 
-  // --- イベント1：上部の3つのタブボタンがタップされた時の処理 ---
+  // --- イベント1：上部のタブ切り替えボタンが押された時の処理 ---
   const tabButtons = document.querySelectorAll('.tab-btn');
   for (let i = 0; i < tabButtons.length; i++) {
     const btn = tabButtons.item(i);
     btn.addEventListener('click', function() {
-      // タップされたボタンの切り替え先ID（tab-home など）を取得します
       const targetId = this.getAttribute('data-target');
-      // UIManagerにタブの切り替えを指示します
-      UIManager.switchTab(targetId);
+      if (targetId) {
+        UIManager.switchTab(targetId);
+        // 記録・現在地タブに戻った時は地図サイズ崩れを防ぐため再描画します
+        if (targetId === 'tab-home') {
+          refreshApp();
+        }
+      }
     });
   }
 
-  // --- イベント2：「この歩数を記録する」ボタンがタップされた時の処理 ---
-  const addBtn = document.getElementById('btn-add-steps');
-  addBtn.addEventListener('click', function() {
-    // 入力された日付と歩数を取得します
-    const dateVal = document.getElementById('input-date').value;
-    const stepsInput = document.getElementById('input-steps');
-    const stepsVal = stepsInput.value;
+  // --- イベント2：「この歩数を記録する」ボタンが押された時の処理 ---
+  const addStepsBtn = document.getElementById('btn-add-steps');
+  if (addStepsBtn) {
+    addStepsBtn.addEventListener('click', function() {
+      const dateInput = document.getElementById('input-date');
+      const stepsInput = document.getElementById('input-steps');
+      const dateVal = dateInput ? dateInput.value : '';
+      const stepsVal = stepsInput ? Number(stepsInput.value) : 0;
 
-    // 日付が空っぽの場合は警告を出して処理を止めます
-    if (!dateVal) {
-      alert('日付を選択してください。');
-      return;
-    }
-    // 歩数が空っぽ、または0以下の場合は警告を出して処理を止めます
-    if (!stepsVal || Number(stepsVal) <= 0) {
-      alert('1歩以上の歩数を入力してください。');
-      return;
-    }
+      // 日付や歩数が未入力・0以下の場合は警告を出して止めます
+      if (!dateVal) {
+        alert('日付を選択してください。');
+        return;
+      }
+      if (!stepsVal || stepsVal <= 0) {
+        alert('1歩以上の歩数を入力してください。');
+        return;
+      }
 
-    // StorageManagerに新しい歩数記録を保存します
-    StorageManager.addStepRecord(dateVal, Number(stepsVal));
-    // 歩数入力欄を空欄に戻します
-    stepsInput.value = '';
-    // 画面全体と地図を最新の状態に更新します
-    refreshApp();
-    // 登録完了のメッセージを表示します
-    alert(stepsVal + ' 歩を記録しました！');
-  });
-
-  // --- イベント3：「設定を保存する」ボタンがタップされた時の処理 ---
-  const saveBtn = document.getElementById('btn-save-settings');
-  saveBtn.addEventListener('click', function() {
-    // 選択されたコースIDと入力された歩幅(cm)を取得します
-    const selectedCourse = document.getElementById('select-course').value;
-    const strideVal = document.getElementById('input-stride').value;
-
-    // 歩幅が極端に小さい・大きい場合のチェックです
-    if (!strideVal || Number(strideVal) < 20 || Number(strideVal) > 200) {
-      alert('歩幅は 20〜200 cm の間で入力してください。');
-      return;
-    }
-
-    // StorageManagerに設定変更を保存します
-    StorageManager.updateSettings(selectedCourse, Number(strideVal));
-    // 変更したコースや歩幅で距離や到達地点を再計算し、画面を更新します
-    refreshApp();
-    // 保存完了のメッセージを表示します
-    alert('設定を保存しました！');
-  });
-
-  // --- イベント4：「すべての記録をリセットする」ボタンがタップされた時の処理 ---
-  const resetBtn = document.getElementById('btn-reset-data');
-  resetBtn.addEventListener('click', function() {
-    // 誤って消さないよう確認ダイアログを出します
-    const msg = '本当にこれまでの歩数記録をすべて消去して初期状態に戻しますか？';
-    const isConfirmed = confirm(msg);
-    if (isConfirmed) {
-      // データを完全に初期化します
-      StorageManager.clearAllData();
-      // 画面と地図を初期状態に描き直します
+      // 全体履歴と選択中コース専用履歴の両方に歩数を追加保存します
+      StorageManager.addStepRecord(dateVal, stepsVal);
+      // 入力欄を空にして画面全体を更新します
+      stepsInput.value = '';
       refreshApp();
-      alert('データをリセットしました。');
-    }
-  });
+      alert(stepsVal.toLocaleString() + ' 歩を記録しました！');
+    });
+  }
+
+  // --- イベント3：「設定を保存する」ボタンが押された時の処理 ---
+  const saveSettingsBtn = document.getElementById('btn-save-settings');
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', function() {
+      const courseSelect = document.getElementById('select-course');
+      const strideInput = document.getElementById('input-stride');
+      const nextCourseId = courseSelect ? courseSelect.value : 'course1';
+      const nextStride = strideInput ? Number(strideInput.value) : 70;
+
+      // 歩幅が極端な値でないか確認します
+      if (!nextStride || nextStride < 20 || nextStride > 200) {
+        alert('歩幅は 20〜200 cm の間で入力してください。');
+        return;
+      }
+
+      // 設定を保存して新しいコースの進捗画面へ切り替えます
+      StorageManager.updateSettings(nextCourseId, nextStride);
+      refreshApp();
+      UIManager.switchTab('tab-home');
+      alert('設定を保存しました！');
+    });
+  }
+
+  // --- イベント4-1：「選択中のコースの進捗をリセット」ボタンの処理 ---
+  const resetCourseBtn = document.getElementById('btn-reset-course');
+  if (resetCourseBtn) {
+    resetCourseBtn.addEventListener('click', function() {
+      const data = StorageManager.loadData();
+      const cid = data.currentCourseId || 'course1';
+      const course = Reflect.get(MASTER_DATA, cid) || MASTER_DATA.course1;
+      const msg = '「' + course.name + '」の進行状況（距離・到達地点）だけを0に戻しますか？\n'
+        + '※日別・週別の歩数グラフや他のコースの進捗は消えません。';
+
+      if (!confirm(msg)) {
+        return;
+      }
+      // 選択中のコースの履歴だけを空にリセットします
+      StorageManager.resetCourseProgress(cid);
+      refreshApp();
+      UIManager.switchTab('tab-home');
+      alert('「' + course.name + '」の進捗をスタート地点（0km）に戻しました。');
+    });
+  }
+
+  // --- イベント4-2：「すべての記録をリセットする」全初期化ボタンの処理 ---
+  const resetAllBtn = document.getElementById('btn-reset-data');
+  if (resetAllBtn) {
+    resetAllBtn.addEventListener('click', function() {
+      const msg = '【注意】すべての歩数グラフ履歴と全コースの進捗データを完全に消去しますか？\n'
+        + '※この操作は取り消せません。';
+      if (!confirm(msg)) {
+        return;
+      }
+      StorageManager.clearAllData();
+      UIManager.setTodayDate();
+      refreshApp();
+      UIManager.switchTab('tab-home');
+      alert('すべてのデータを初期化しました。');
+    });
+  }
 
   // --- イベント5：グラフの期間切り替えボタンがタップされた時の処理 ---
   const modeButtons = document.querySelectorAll('.chart-mode-btn');

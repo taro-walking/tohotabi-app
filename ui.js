@@ -11,11 +11,14 @@ const UIManager = {
     const msgEl = document.getElementById('encouragement-msg');
     msgEl.textContent = message;
 
-    // 3. 現在の到達地点（街の名前・距離・歩数）を書き換えます
+    // 選択中コース専用の履歴と累計歩数を取得します
+    const cStats = StorageManager.getCourseStats(data.currentCourseId, data);
+
+    // 3. 現在の到達地点（街の名前・コース距離・コース歩数）を書き換えます
     const lp = progress.latestPoint;
     document.getElementById('latest-point-name').textContent = lp.name;
     document.getElementById('total-km').textContent = progress.currentKm + ' km';
-    const stepsStr = data.totalSteps.toLocaleString() + ' 歩';
+    const stepsStr = cStats.totalSteps.toLocaleString() + ' 歩';
     document.getElementById('total-steps').textContent = stepsStr;
 
     // 4. 名所と特産品を書き換えます
@@ -40,10 +43,10 @@ const UIManager = {
     this.updateChartButtons(mode);
     this.renderChart(chartSummary, mode);
 
-    // 7. コース通過チェックリスト（到達日付け付き）を描画します
+    // 7. コース通過チェックリスト（コース専用履歴から到達日付を計算）を描画します
     const reachedMap = WalkLogic.calcPointReachedDates(
       data.currentCourseId,
-      data.history,
+      cStats.history,
       data.strideCm
     );
     this.renderPointList(data.currentCourseId, progress.currentKm, reachedMap);
