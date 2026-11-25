@@ -14,13 +14,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="徒歩旅">
   <!-- iPhoneのホーム画面に表示する専用アイコンの指定です -->
-  <link rel="apple-touch-icon" href="icon.png?v=20261125c">
+  <link rel="apple-touch-icon" href="icon.png?v=20261125d">
   <!-- アプリ全体の設定ファイル（manifest.json）を読み込みます -->
-  <link rel="manifest" href="manifest.json?v=20261125c">
+  <link rel="manifest" href="manifest.json?v=20261125d">
   <!-- ブラウザのタブやホーム画面に表示されるタイトルです -->
   <title>徒歩旅 - マイ・ウォーキング旅</title>
   <!-- 画面デザイン用ファイル（style.css）を読み込みます -->
-  <link rel="stylesheet" href="style.css?v=20261125c">
+  <link rel="stylesheet" href="style.css?v=20261125d">
 </head>
 <body>
 
@@ -176,8 +176,8 @@
       <!-- データの保存・復元・消去・アプリ更新を行うカードです -->
       <div class="card">
         <h2>データ管理</h2>
-        <!-- 1. すべての歩行データと進捗をJSONファイルに保存するボタン（濃い緑）です -->
-        <button type="button" id="btn-export-data" class="primary-btn" style="margin-bottom: 10px;">
+        <!-- 1. すべての歩行データと進捗をJSONファイルに保存するボタン（白背景＋緑枠）です -->
+        <button type="button" id="btn-export-data" style="width: 100%; padding: 12px; margin-bottom: 10px; background-color: #ffffff; color: #2e6f40; border: 2px solid #2e6f40; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer;">
           💾 データのバックアップ（機種変更時等）
         </button>
         <!-- 2. 保存したJSONファイルからデータを復元するボタン（白背景＋緑枠）です -->
@@ -192,7 +192,7 @@
         </button>
         <!-- 4. 最下段：iPhoneで古い画面が残った時に最新版を読み込むボタン（グレー系）です -->
         <button type="button" onclick="location.href=location.pathname+'?t='+Date.now();" style="width: 100%; padding: 11px; background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; font-weight: bold; cursor: pointer;">
-          🔄 アプリを最新版に更新（v20261125c）
+          🔄 アプリを最新版に更新（v20261125d）
         </button>
       </div>
     </section>
@@ -200,25 +200,25 @@
   </div>
 
   <!-- 1-1. コース1（三陸ルート）の個別データを読み込みます -->
-  <script src="course1.js?v=20261125c"></script>
+  <script src="course1.js?v=20261125d"></script>
   <!-- 1-2. コース2（東海道五十三次）の個別データを読み込みます -->
-  <script src="course2.js?v=20261125c"></script>
+  <script src="course2.js?v=20261125d"></script>
   <!-- 1-3. 各コースデータをまとめる目次（master.js）を読み込みます -->
-  <script src="master.js?v=20261125c"></script>
+  <script src="master.js?v=20261125d"></script>
   <!-- 2. 保存データ管理を読み込みます -->
-  <script src="storage.js?v=20261125c"></script>
+  <script src="storage.js?v=20261125d"></script>
   <!-- 3. 計算・位置判定を読み込みます -->
-  <script src="logic.js?v=20261125c"></script>
+  <script src="logic.js?v=20261125d"></script>
   <!-- 4. 画面表示の更新担当を読み込みます -->
-  <script src="ui.js?v=20261125c"></script>
+  <script src="ui.js?v=20261125d"></script>
   <!-- 4.4 座標計算専用モジュールを読み込みます -->
-  <script src="map-calc.js?v=20261125c"></script>
+  <script src="map-calc.js?v=20261125d"></script>
   <!-- 4.5 地図HTML生成モジュールを読み込みます -->
-  <script src="map-html.js?v=20261125c"></script>
+  <script src="map-html.js?v=20261125d"></script>
   <!-- 4.6 地図描画・操作モジュールを読み込みます -->
-  <script src="map.js?v=20261125c"></script>
+  <script src="map.js?v=20261125d"></script>
   <!-- 5. メイン制御を読み込みます -->
-  <script src="main.js?v=20261125c"></script>
+  <script src="main.js?v=20261125d"></script>
 </body>
 </html>
 <!-- --- index.html ここまで --- -->
