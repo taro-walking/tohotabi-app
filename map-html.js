@@ -113,9 +113,16 @@ const MapHtml = {
         popup += 'padding:6px 10px; font-size:11px; z-index:6; ';
         popup += 'box-shadow:0 2px 6px rgba(0,0,0,0.2); ';
         popup += 'pointer-events:none;">';
-        popup += '<div style="font-weight:bold; color:#2e6f40;">';
-        popup += pt.name + ' (' + pt.km + 'km)</div>';
-        popup += '<div>🏯 ' + pt.spot + '</div>';
+        popup += '<div style="display:flex; justify-content:space-between; ';
+        popup += 'align-items:center; gap:6px;">';
+        popup += '<span style="font-weight:bold; color:#2e6f40;">';
+        popup += pt.name + ' (' + pt.km + 'km)</span>';
+        popup += '<button type="button" data-guide-id="' + pt.id + '" ';
+        popup += 'style="pointer-events:auto; background:#2e6f40; ';
+        popup += 'color:#ffffff; border:none; border-radius:5px; ';
+        popup += 'padding:3px 8px; font-size:11px; font-weight:bold; ';
+        popup += 'cursor:pointer;">📖 写真・ガイド</button></div>';
+        popup += '<div style="margin-top:2px;">🏯 ' + pt.spot + '</div>';
         popup += '<div>🍱 ' + pt.specialty + '</div></div>';
       }
     }

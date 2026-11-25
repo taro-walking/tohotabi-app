@@ -147,7 +147,7 @@ const UIManager = {
       container.appendChild(col);
     }
   },
-   // 【機能3】コース内の全地点と到達状況・到達日付けを描画する関数です
+ // 【機能3】コース内の全地点と到達状況・到達日付けを描画する関数です
   renderPointList: function(courseId, currentKm, reachedMap) {
     // リストを表示するul要素を取得します
     const listEl = document.getElementById('point-list');
@@ -320,4 +320,4 @@ const UIManager = {
     document.getElementById(targetId).classList.add('active');
   }
 };
-// --- ui.js ここまで ---
+// --- ui.js ここまで --- 

@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('【' + pointLabel + '】からスタートします！');
     });
   }
- // --- イベント4：「すべての歩行記録を完全に消去」全初期化ボタンの処理 ---
+  // --- イベント4：「すべての歩行記録を完全に消去」全初期化ボタンの処理 ---
   const resetAllBtn = document.getElementById('btn-reset-data');
   if (resetAllBtn) {
     resetAllBtn.addEventListener('click', function() {

@@ -119,7 +119,6 @@ const MapManager = {
     const onEnd = () => {
       this.isPointerDown = false;
     };
-
     // スマホのタッチイベントを登録します
     box.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
@@ -166,6 +165,12 @@ const MapManager = {
       }
       const btn = e.target.closest('button');
       if (!btn) {
+        return;
+      }
+      // ミニカード内の「写真・ガイド」ボタンが押された時の処理です
+      const guideId = btn.getAttribute('data-guide-id');
+      if (guideId && this.lastParams && typeof GuideModal !== 'undefined') {
+        GuideModal.open(this.lastParams.courseId, Number(guideId));
         return;
       }
       const action = btn.getAttribute('data-action');
