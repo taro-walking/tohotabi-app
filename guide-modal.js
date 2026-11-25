@@ -15,14 +15,14 @@ const GuideModal = {
     overlay.id = 'guide-modal-overlay';
     overlay.style.cssText = 'display:none; position:fixed; inset:0; ' +
       'background:rgba(0,0,0,0.68); z-index:9999; ' +
-      'align-items:center; justify-content:center; padding:12px;';
+      'align-items:center; justify-content:center; padding:10px;';
 
     // スマホ1画面に収まる白いカード枠を作成します
     const card = document.createElement('div');
     card.id = 'guide-modal-card';
-    card.style.cssText = 'width:100%; max-width:430px; max-height:90vh; ' +
+    card.style.cssText = 'width:100%; max-width:420px; max-height:94vh; ' +
       'background:#ffffff; border-radius:14px; overflow-y:auto; ' +
-      'box-shadow:0 8px 24px rgba(0,0,0,0.35); padding:16px; ' +
+      'box-shadow:0 8px 24px rgba(0,0,0,0.35); padding:12px 14px; ' +
       'box-sizing:border-box; position:relative;';
 
     // カードの中身を入れる専用コンテナを追加します
@@ -82,13 +82,13 @@ const GuideModal = {
     if (isPassed) {
       const dateLabel = rawDate ? rawDate.replace(/-/g, '/') + ' 到達' : '到達済み';
       badgeHtml = '<span style="display:inline-block; background:#e6f4ea; ' +
-        'color:#1e7e34; font-size:0.78rem; font-weight:bold; ' +
-        'padding:3px 10px; border-radius:12px;">✅ ' + dateLabel + '</span>';
+        'color:#1e7e34; font-size:0.75rem; font-weight:bold; ' +
+        'padding:2px 8px; border-radius:10px;">✅ ' + dateLabel + '</span>';
     } else {
       const diffKm = Math.round((targetPt.km - progress.currentKm) * 10) / 10;
       badgeHtml = '<span style="display:inline-block; background:#fff7ed; ' +
-        'color:#c2410c; font-size:0.78rem; font-weight:bold; ' +
-        'padding:3px 10px; border-radius:12px;">🚩 未到達（あと ' + diffKm + ' km）</span>';
+        'color:#c2410c; font-size:0.75rem; font-weight:bold; ' +
+        'padding:2px 8px; border-radius:10px;">🚩 未到達（あと ' + diffKm + ' km）</span>';
     }
 
     // 写真リスト（guidePhotos配列、または従来のimg単体）を組み立てます
@@ -101,64 +101,58 @@ const GuideModal = {
         }
       }
     } else if (targetPt.img && targetPt.img.trim() !== '') {
-      photoList.push({ file: targetPt.img.trim(), caption: targetPt.name });
+      photoList.push({ file: targetPt.img.trim() });
     }
 
-    // 写真エリアのHTMLを生成します（複数枚の場合は上下に並べて比較可能にします）
+    // 写真エリアのHTMLを生成します（キャプション無しで上下にコンパクト表示）
     let photosHtml = '';
     if (photoList.length > 0) {
       for (let i = 0; i < photoList.length; i++) {
         const pItem = photoList.at(i);
         const imgPath = 'images/' + pItem.file;
-        const capText = pItem.caption || '';
         photosHtml += '<div class="guide-photo-box" data-file="' + pItem.file + '" ' +
-          'style="margin:10px 0; border-radius:10px; overflow:hidden; ' +
+          'style="margin:6px 0; border-radius:8px; overflow:hidden; ' +
           'background:#f8fafc; border:1px solid #cbd5e1;">' +
-          '<img src="' + imgPath + '" alt="' + capText + '" ' +
-          'style="width:100%; max-height:210px; object-fit:cover; display:block;">';
-        if (capText !== '') {
-          photosHtml += '<div style="padding:6px 10px; font-size:0.8rem; ' +
-            'font-weight:bold; color:#1e293b; background:#f1f5f9; ' +
-            'border-top:1px solid #e2e8f0; line-height:1.4;">' + capText + '</div>';
-        }
-        photosHtml += '</div>';
+          '<img src="' + imgPath + '" alt="' + targetPt.name + '" ' +
+          'style="width:100%; max-height:155px; object-fit:cover; display:block;">' +
+          '</div>';
       }
     } else {
-      photosHtml = '<div style="margin:12px 0; padding:22px 12px; ' +
-        'border-radius:10px; background:#f8fafc; border:1px dashed #cbd5e1; ' +
-        'text-align:center; color:#64748b; font-size:0.85rem;">' +
-        '🖼️ 浮世絵・現在写真 準備中<br><span style="font-size:0.75rem;">' +
+      photosHtml = '<div style="margin:8px 0; padding:18px 10px; ' +
+        'border-radius:8px; background:#f8fafc; border:1px dashed #cbd5e1; ' +
+        'text-align:center; color:#64748b; font-size:0.82rem;">' +
+        '🖼️ 浮世絵・現在写真 準備中<br><span style="font-size:0.72rem;">' +
         '（imagesフォルダに画像を追加すると表示されます）</span></div>';
     }
 
-    // 詳細な歴史・紀行コメント（guideComment優先、無ければtopicを使用）を作ります
+    // 詳細な歴史・紀行コメント（10行以内に収まるスッキリ表示）を作ります
     const commentText = (targetPt.guideComment && targetPt.guideComment.trim() !== '')
       ? targetPt.guideComment.trim()
       : (targetPt.topic || '');
 
     let commentHtml = '';
     if (commentText !== '') {
-      commentHtml = '<div style="margin-top:12px; background:#fffbeb; ' +
-        'border-radius:10px; padding:12px; border:1px solid #fde68a;">' +
-        '<div style="font-weight:bold; color:#92400e; font-size:0.86rem; ' +
-        'margin-bottom:4px;">📜 当時の面影と現在の状況</div>' +
-        '<div style="font-size:0.92rem; color:#1f2937; line-height:1.65;">' +
+      commentHtml = '<div style="margin-top:8px; background:#fffbeb; ' +
+        'border-radius:8px; padding:9px 11px; border:1px solid #fde68a;">' +
+        '<div style="font-weight:bold; color:#92400e; font-size:0.8rem; ' +
+        'margin-bottom:3px;">📜 当時の面影と現在の状況</div>' +
+        '<div style="font-size:0.84rem; color:#1f2937; line-height:1.48;">' +
         commentText + '</div></div>';
     }
 
     // ポップアップ全体のHTMLを流し込みます
     const bodyEl = document.getElementById('guide-modal-body');
     bodyEl.innerHTML =
-      '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
-      '<span style="font-size:0.82rem; color:#6b7280; font-weight:bold;">' +
+      '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">' +
+      '<span style="font-size:0.78rem; color:#6b7280; font-weight:bold;">' +
       'スタートから ' + targetPt.km + ' km地点</span>' + badgeHtml + '</div>' +
-      '<h2 style="margin:6px 0 6px 0; font-size:1.3rem; color:#111827;">' +
+      '<h2 style="margin:3px 0 4px 0; font-size:1.15rem; color:#111827;">' +
       targetPt.name + '</h2>' +
       photosHtml +
       commentHtml +
       '<button type="button" id="btn-close-guide-modal" ' +
-      'style="width:100%; margin-top:14px; padding:12px; background:#2e6f40; ' +
-      'color:#ffffff; border:none; border-radius:8px; font-size:1rem; ' +
+      'style="width:100%; margin-top:10px; padding:10px; background:#2e6f40; ' +
+      'color:#ffffff; border:none; border-radius:8px; font-size:0.95rem; ' +
       'font-weight:bold; cursor:pointer;">✕ 閉じる</button>';
 
     // 画像ファイルがまだ存在しない場合のエラー自動切替を登録します
@@ -169,9 +163,9 @@ const GuideModal = {
       const fName = box.getAttribute('data-file') || '';
       if (img) {
         img.onerror = function() {
-          box.style.padding = '16px 10px';
+          box.style.padding = '12px 8px';
           box.style.textAlign = 'center';
-          box.innerHTML = '<div style="color:#64748b; font-size:0.82rem;">' +
+          box.innerHTML = '<div style="color:#64748b; font-size:0.8rem;">' +
             '🖼️ 画像準備中（images/' + fName + '）</div>';
         };
       }
