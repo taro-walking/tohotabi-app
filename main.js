@@ -149,32 +149,11 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('【' + pointLabel + '】からスタートします！');
     });
   }
-  // --- イベント4-1：「選択中のコースの進捗をリセット」ボタンの処理 ---
-  const resetCourseBtn = document.getElementById('btn-reset-course');
-  if (resetCourseBtn) {
-    resetCourseBtn.addEventListener('click', function() {
-      const data = StorageManager.loadData();
-      const cid = data.currentCourseId || 'course1';
-      const course = Reflect.get(MASTER_DATA, cid) || MASTER_DATA.course1;
-      const msg = '「' + course.name + '」の進行状況（距離・到達地点・ワープ設定）だけを0に戻しますか？\n'
-        + '※日別・週別の歩数グラフや他のコースの進捗は消えません。';
-
-      if (!confirm(msg)) {
-        return;
-      }
-      // 選択中のコースの履歴とワープ開始距離を0にリセットします
-      StorageManager.resetCourseProgress(cid);
-      refreshApp();
-      UIManager.switchTab('tab-home');
-      alert('「' + course.name + '」の進捗をスタート地点（0km）に戻しました。');
-    });
-  }
-
-  // --- イベント4-2：「すべての記録をリセットする」全初期化ボタンの処理 ---
+ // --- イベント4：「すべての歩行記録を完全に消去」全初期化ボタンの処理 ---
   const resetAllBtn = document.getElementById('btn-reset-data');
   if (resetAllBtn) {
     resetAllBtn.addEventListener('click', function() {
-      const msg = '【注意】すべての歩数グラフ履歴と全コースの進捗データを完全に消去しますか？\n'
+      const msg = '【注意】すべての歩行記録グラフと全コースの進捗データを完全に消去しますか？\n'
         + '※この操作は取り消せません。';
       if (!confirm(msg)) {
         return;
@@ -202,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // --- イベント6：「データをファイルに保存（バックアップ）」ボタンの処理 ---
+  // --- イベント6：「すべてのデータをファイルに保存」ボタンの処理 ---
   const exportBtn = document.getElementById('btn-export-data');
   if (exportBtn) {
     exportBtn.addEventListener('click', function() {
@@ -228,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // --- イベント7：「バックアップファイルから復元」ボタンとファイル選択の処理 ---
+  // --- イベント7：「保存ファイルからデータを復元」ボタンとファイル選択の処理 ---
   const importBtn = document.getElementById('btn-import-data');
   const importInput = document.getElementById('input-import-file');
   if (importBtn && importInput) {
@@ -252,13 +231,13 @@ document.addEventListener('DOMContentLoaded', function() {
       reader.onload = function() {
         try {
           const text = String(reader.result || '');
-          const ok = confirm('選択したバックアップファイルの内容で現在のデータを上書き復元しますか？');
+          const ok = confirm('選択した保存ファイルの内容で現在のデータを上書き復元しますか？');
           if (!ok) {
             return;
           }
           StorageManager.importBackupJson(text);
           refreshApp();
-          alert('バックアップからデータを復元しました！');
+          alert('保存ファイルからデータを復元しました！');
         } catch (err) {
           const msg = (err instanceof Error) ? err.message : String(err);
           alert('復元に失敗しました：' + msg);
@@ -268,4 +247,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
-// --- main.js ここまで --- 
+// --- main.js ここまで ---
