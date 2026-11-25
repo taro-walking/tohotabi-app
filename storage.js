@@ -12,19 +12,25 @@ const DEFAULT_DATA = {
   // 全コース合算の日別歩数記録（グラフ表示用）
   history: [],
   // コースごとの歩数記録を独立して保存する箱です
-  courseHistories: {}
+  courseHistories: {},
+  // コースごとの途中スタート（ワープ）開始距離(km)を保存する箱です
+  courseStartKm: {}
 };
 
 // 保存データ管理の機能をひとまとめにしたモジュールです
 const StorageManager = {
 
-  // 【内部補助】古い保存データにコース別履歴が無い場合に自動移行する関数です
+  // 【内部補助】古い保存データに新しい項目が無い場合に自動移行する関数です
   _migrateData: function(rawData) {
     // 初期データのひな形をベースに読み込みデータを合体させます
     const data = Object.assign({}, DEFAULT_DATA, rawData);
     // courseHistories が未作成またはオブジェクトでない場合は初期化します
     if (!data.courseHistories || typeof data.courseHistories !== 'object') {
       data.courseHistories = {};
+    }
+    // courseStartKm が未作成またはオブジェクトでない場合は初期化します
+    if (!data.courseStartKm || typeof data.courseStartKm !== 'object') {
+      data.courseStartKm = {};
     }
     // 過去の履歴があり、まだコース別履歴が1つも無い場合は現在コースへ引き継ぎます
     const hasHistory = Array.isArray(data.history) && data.history.length > 0;
@@ -87,13 +93,16 @@ const StorageManager = {
     return data;
   },
 
-  // 【機能4】指定したコースの履歴リストと累計歩数を取得する関数です
+  // 【機能4】指定したコースの履歴・累計歩数・ワープ開始距離を取得する関数です
   getCourseStats: function(courseId, dataObj) {
     // 引数にデータがあればそれを使い、無ければ最新を読み込みます
     const data = dataObj || this.loadData();
     const cid = courseId || data.currentCourseId || 'course1';
     // 対象コースの履歴配列を取り出します（無ければ空配列）
     const cHistory = Reflect.get(data.courseHistories, cid) || [];
+    // 対象コースのワープ開始距離(km)を取り出します（無ければ 0）
+    const rawStartKm = Reflect.get(data.courseStartKm, cid);
+    const startKm = (typeof rawStartKm === 'number') ? rawStartKm : 0;
 
     // 対象コースの累計歩数を合計します
     let cTotalSteps = 0;
@@ -104,10 +113,11 @@ const StorageManager = {
       }
     }
 
-    // コース専用の履歴と累計歩数をまとめて返します
+    // コース専用の履歴・累計歩数・ワープ開始距離をまとめて返します
     return {
       history: cHistory,
-      totalSteps: cTotalSteps
+      totalSteps: cTotalSteps,
+      startKm: startKm
     };
   },
 
@@ -124,12 +134,26 @@ const StorageManager = {
     return data;
   },
 
-  // 【機能6】選択中（または指定）コースの実績だけを0にリセットする関数です
+  // 【機能6-1】指定コースの途中スタート（ワープ）地点を設定する関数です
+  setCourseWarp: function(courseId, startKm) {
+    const data = this.loadData();
+    const cid = courseId || data.currentCourseId || 'course1';
+    const kmVal = Number(startKm) || 0;
+    // 指定地点ピタリから始めるため、そのコースの歩数履歴を0に戻します
+    Reflect.set(data.courseHistories, cid, []);
+    // 指定地点の距離(km)をワープ開始位置として上書き保存します
+    Reflect.set(data.courseStartKm, cid, kmVal);
+    this.saveData(data);
+    return data;
+  },
+
+  // 【機能6-2】選択中（または指定）コースの実績とワープ位置を0にリセットする関数です
   resetCourseProgress: function(courseId) {
     const data = this.loadData();
     const cid = courseId || data.currentCourseId || 'course1';
-    // 対象コースの履歴だけを空配列に書き換えます（全体履歴は残ります）
+    // 対象コースの履歴を空配列に、ワープ開始距離を0に書き換えます（全体履歴は残ります）
     Reflect.set(data.courseHistories, cid, []);
+    Reflect.set(data.courseStartKm, cid, 0);
     this.saveData(data);
     return data;
   },

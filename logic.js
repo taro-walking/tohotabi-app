@@ -12,12 +12,15 @@ const WalkLogic = {
   },
 
   // 【機能2】現在のコースと累計距離から到達状況や次の目的地を判定する関数です
-  evaluateProgress: function(courseId, totalSteps, strideCm) {
+  evaluateProgress: function(courseId, totalSteps, strideCm, startKm) {
     // 選択されたコースのマスターデータを取得します
     const course = Reflect.get(MASTER_DATA, courseId) || MASTER_DATA.course1;
     const points = course.points;
-    // 現在の累計歩行距離(km)を計算します
-    const currentKm = this.calculateDistanceKm(totalSteps, strideCm);
+    // ワープ開始距離(km)が指定されていれば数値として受け取ります（初期値0）
+    const baseKm = (typeof startKm === 'number') ? startKm : 0;
+    // 実際に歩いた距離(km)を計算し、ワープ開始距離と合算します
+    const walkedKm = this.calculateDistanceKm(totalSteps, strideCm);
+    const currentKm = Math.round((baseKm + walkedKm) * 100) / 100;
 
     // 通過済み地点リストと次の目的地を用意します
     const passedPoints = new Array();
@@ -54,6 +57,7 @@ const WalkLogic = {
     return {
       courseName: course.name,
       currentKm: currentKm,
+      startKm: baseKm,
       goalKm: goalPoint.km,
       passedPoints: passedPoints,
       latestPoint: latestPoint,
@@ -77,9 +81,11 @@ const WalkLogic = {
   },
 
   // 【機能4】各地点に何月何日に到達したかを履歴から逆算する関数です
-  calcPointReachedDates: function(courseId, history, strideCm) {
+  calcPointReachedDates: function(courseId, history, strideCm, startKm) {
     const course = Reflect.get(MASTER_DATA, courseId) || MASTER_DATA.course1;
     const points = course.points;
+    // ワープ開始距離(km)を受け取ります（初期値0）
+    const baseKm = (typeof startKm === 'number') ? startKm : 0;
     // 地点IDごとの到達日付を入れる箱です
     const reachedMap = {};
 
@@ -101,11 +107,16 @@ const WalkLogic = {
         continue;
       }
       accSteps += rec.steps;
-      const accKm = this.calculateDistanceKm(accSteps, strideCm);
+      const walkedKm = this.calculateDistanceKm(accSteps, strideCm);
+      const accKm = Math.round((baseKm + walkedKm) * 100) / 100;
 
       for (let j = 0; j < points.length; j++) {
         const pt = points.at(j);
         if (!pt) {
+          continue;
+        }
+        // ワープ開始地点より手前の地点は日付を付けず「到達済」表示にします
+        if (pt.km <= baseKm && baseKm > 0) {
           continue;
         }
         const key = String(pt.id);

@@ -11,7 +11,7 @@ const UIManager = {
     const msgEl = document.getElementById('encouragement-msg');
     msgEl.textContent = message;
 
-    // 選択中コース専用の履歴と累計歩数を取得します
+    // 選択中コース専用の履歴・累計歩数・ワープ開始距離を取得します
     const cStats = StorageManager.getCourseStats(data.currentCourseId, data);
 
     // 3. 現在の到達地点（街の名前・コース距離・コース歩数）を書き換えます
@@ -43,17 +43,19 @@ const UIManager = {
     this.updateChartButtons(mode);
     this.renderChart(chartSummary, mode);
 
-    // 7. コース通過チェックリスト（コース専用履歴から到達日付を計算）を描画します
+    // 7. コース通過チェックリスト（ワープ開始距離を考慮して到達日付を計算）を描画します
     const reachedMap = WalkLogic.calcPointReachedDates(
       data.currentCourseId,
       cStats.history,
-      data.strideCm
+      data.strideCm,
+      cStats.startKm
     );
     this.renderPointList(data.currentCourseId, progress.currentKm, reachedMap);
 
-    // 8. 設定画面の選択状態（コースと歩幅）を反映させます
+    // 8. 設定画面の選択状態（コース・歩幅・ワープ候補一覧）を反映させます
     document.getElementById('select-course').value = data.currentCourseId;
     document.getElementById('input-stride').value = data.strideCm;
+    this.updateWarpOptions(data.currentCourseId, cStats.startKm);
   },
 
   // 【機能2-1】グラフ期間切替ボタンの見た目とタイトルを更新する関数です
@@ -145,8 +147,7 @@ const UIManager = {
       container.appendChild(col);
     }
   },
-
-  // 【機能3】コース内の全地点と到達状況・到達日付けを描画する関数です
+   // 【機能3】コース内の全地点と到達状況・到達日付けを描画する関数です
   renderPointList: function(courseId, currentKm, reachedMap) {
     // リストを表示するul要素を取得します
     const listEl = document.getElementById('point-list');
@@ -189,7 +190,7 @@ const UIManager = {
     }
   },
 
-  // 【機能4】設定画面のコース選択プルダウンを生成する関数です
+  // 【機能4-1】設定画面のコース選択プルダウンを生成する関数です
   initCourseOptions: function() {
     const selectEl = document.getElementById('select-course');
     selectEl.innerHTML = '';
@@ -206,6 +207,40 @@ const UIManager = {
       option.value = id;
       option.textContent = course.name;
       selectEl.appendChild(option);
+    }
+  },
+
+  // 【機能4-2】設定画面のワープ（途中スタート）地点プルダウンを生成する関数です
+  updateWarpOptions: function(courseId, currentStartKm) {
+    const warpSelect = document.getElementById('select-warp-point');
+    if (!warpSelect) {
+      return;
+    }
+    warpSelect.innerHTML = '';
+
+    // 対象コースの全地点リストを取り出します
+    const course = Reflect.get(MASTER_DATA, courseId) || MASTER_DATA.course1;
+    const points = course.points;
+    const baseKm = (typeof currentStartKm === 'number') ? currentStartKm : 0;
+
+    for (let i = 0; i < points.length; i++) {
+      const pt = points.at(i);
+      if (!pt) {
+        continue;
+      }
+      const opt = document.createElement('option');
+      opt.value = String(pt.km);
+      // 0km地点（スタート地点）は分かりやすく表記します
+      if (pt.km === 0) {
+        opt.textContent = '0km：' + pt.name + '（最初から）';
+      } else {
+        opt.textContent = pt.km + 'km：' + pt.name;
+      }
+      // 現在設定中のワープ開始距離と一致する項目を選択状態にします
+      if (pt.km === baseKm) {
+        opt.selected = true;
+      }
+      warpSelect.appendChild(opt);
     }
   },
 

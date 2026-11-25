@@ -7,13 +7,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function refreshApp() {
     // 1. 保存データを読み込みます
     const data = StorageManager.loadData();
-    // 2. 選択中コース専用の累計歩数と履歴を取り出します
+    // 2. 選択中コース専用の累計歩数・履歴・ワープ開始距離を取り出します
     const cStats = StorageManager.getCourseStats(data.currentCourseId, data);
-    // 3. 選択中コース専用の歩数と歩幅から進行状況を判定します
+    // 3. 選択中コース専用の歩数・歩幅・ワープ開始距離から進行状況を判定します
     const progress = WalkLogic.evaluateProgress(
       data.currentCourseId,
       cStats.totalSteps,
-      data.strideCm
+      data.strideCm,
+      cStats.startKm
     );
     // 4. 励ましメッセージを作成します
     const message = WalkLogic.createEncouragementMessage(progress);
@@ -77,7 +78,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // --- イベント3：「設定を保存する」ボタンが押された時の処理 ---
+  // --- イベント3-1：「設定を保存する」ボタンとコース変更時の連動処理 ---
+  const courseSelectEl = document.getElementById('select-course');
+  if (courseSelectEl) {
+    // 設定画面でコースを切り替えた時、下のワープ先候補も連動して切り替えます
+    courseSelectEl.addEventListener('change', function() {
+      const data = StorageManager.loadData();
+      const nextCid = courseSelectEl.value;
+      const stats = StorageManager.getCourseStats(nextCid, data);
+      UIManager.updateWarpOptions(nextCid, stats.startKm);
+    });
+  }
+
   const saveSettingsBtn = document.getElementById('btn-save-settings');
   if (saveSettingsBtn) {
     saveSettingsBtn.addEventListener('click', function() {
@@ -100,6 +112,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // --- イベント3-2：「この地点からスタートする（ワープ）」ボタンの処理 ---
+  const applyWarpBtn = document.getElementById('btn-apply-warp');
+  if (applyWarpBtn) {
+    applyWarpBtn.addEventListener('click', function() {
+      const courseSelect = document.getElementById('select-course');
+      const strideInput = document.getElementById('input-stride');
+      const warpSelect = document.getElementById('select-warp-point');
+      const cid = courseSelect ? courseSelect.value : 'course1';
+      const nextStride = strideInput ? Number(strideInput.value) : 70;
+      const targetKm = warpSelect ? Number(warpSelect.value) : 0;
+
+      // 選択中の地点名を取得して確認メッセージを作ります
+      let pointLabel = targetKm + 'km地点';
+      if (warpSelect && warpSelect.selectedIndex >= 0) {
+        pointLabel = warpSelect.options.item(warpSelect.selectedIndex).textContent;
+      }
+      const course = Reflect.get(MASTER_DATA, cid) || MASTER_DATA.course1;
+      const msg = '「' + course.name + '」のスタート位置を\n'
+        + '【' + pointLabel + '】に設定しますか？\n'
+        + '※このコースのこれまでの歩数進捗はリセットされます（日別グラフは消えません）。';
+
+      if (!confirm(msg)) {
+        return;
+      }
+
+      // コースと歩幅の選択も保存したうえでワープ開始位置をセットします
+      if (nextStride >= 20 && nextStride <= 200) {
+        StorageManager.updateSettings(cid, nextStride);
+      } else {
+        StorageManager.updateSettings(cid, null);
+      }
+      StorageManager.setCourseWarp(cid, targetKm);
+      refreshApp();
+      UIManager.switchTab('tab-home');
+      alert('【' + pointLabel + '】からスタートします！');
+    });
+  }
   // --- イベント4-1：「選択中のコースの進捗をリセット」ボタンの処理 ---
   const resetCourseBtn = document.getElementById('btn-reset-course');
   if (resetCourseBtn) {
@@ -107,13 +156,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = StorageManager.loadData();
       const cid = data.currentCourseId || 'course1';
       const course = Reflect.get(MASTER_DATA, cid) || MASTER_DATA.course1;
-      const msg = '「' + course.name + '」の進行状況（距離・到達地点）だけを0に戻しますか？\n'
+      const msg = '「' + course.name + '」の進行状況（距離・到達地点・ワープ設定）だけを0に戻しますか？\n'
         + '※日別・週別の歩数グラフや他のコースの進捗は消えません。';
 
       if (!confirm(msg)) {
         return;
       }
-      // 選択中のコースの履歴だけを空にリセットします
+      // 選択中のコースの履歴とワープ開始距離を0にリセットします
       StorageManager.resetCourseProgress(cid);
       refreshApp();
       UIManager.switchTab('tab-home');
@@ -219,4 +268,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
-// --- main.js ここまで ---
+// --- main.js ここまで --- 
