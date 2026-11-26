@@ -119,6 +119,7 @@ const MapManager = {
     const onEnd = () => {
       this.isPointerDown = false;
     };
+
     // スマホのタッチイベントを登録します
     box.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
@@ -153,8 +154,7 @@ const MapManager = {
     });
     box.addEventListener('mouseup', onEnd);
     box.addEventListener('mouseleave', onEnd);
-
-    // ボタンとピンのタップを判定します
+    // ボタンとピンのタップを判定します（divピンにも対応）
     box.addEventListener('click', (e) => {
       if (this.hasMoved) {
         this.hasMoved = false;
@@ -163,7 +163,8 @@ const MapManager = {
       if (!(e.target instanceof Element)) {
         return;
       }
-      const btn = e.target.closest('button');
+      // 通常のbutton要素またはピン用のdiv要素を取得します
+      const btn = e.target.closest('button, div');
       if (!btn) {
         return;
       }
@@ -268,4 +269,4 @@ const MapManager = {
     }
   }
 };
-// --- map.js ここまで ---
+// --- map.js ここまで --- 

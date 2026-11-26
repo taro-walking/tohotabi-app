@@ -91,26 +91,16 @@ const GuideModal = {
         'padding:2px 8px; border-radius:10px;">🚩 未到達（あと ' + diffKm + ' km）</span>';
     }
 
-    // 写真リスト（guidePhotos配列、または従来のimg単体）を組み立てます
-    const photoList = new Array();
-    if (Array.isArray(targetPt.guidePhotos) && targetPt.guidePhotos.length > 0) {
-      for (let i = 0; i < targetPt.guidePhotos.length; i++) {
-        const item = targetPt.guidePhotos.at(i);
-        if (item && item.file) {
-          photoList.push(item);
-        }
-      }
-    } else if (targetPt.img && targetPt.img.trim() !== '') {
-      photoList.push({ file: targetPt.img.trim() });
-    }
+    // 共通エンジンから写真ファイル名一覧を自動取得します
+    const fileList = CourseHelper.getPhotoFiles(targetPt);
 
     // 写真エリアのHTMLを生成します（キャプション無しで上下にコンパクト表示）
     let photosHtml = '';
-    if (photoList.length > 0) {
-      for (let i = 0; i < photoList.length; i++) {
-        const pItem = photoList.at(i);
-        const imgPath = 'images/' + pItem.file;
-        photosHtml += '<div class="guide-photo-box" data-file="' + pItem.file + '" ' +
+    if (fileList.length > 0) {
+      for (let i = 0; i < fileList.length; i++) {
+        const fName = fileList.at(i);
+        const imgPath = 'images/' + fName;
+        photosHtml += '<div class="guide-photo-box" data-file="' + fName + '" ' +
           'style="margin:6px 0; border-radius:8px; overflow:hidden; ' +
           'background:#f8fafc; border:1px solid #cbd5e1;">' +
           '<img src="' + imgPath + '" alt="' + targetPt.name + '" ' +
@@ -140,18 +130,26 @@ const GuideModal = {
         commentText + '</div></div>';
     }
 
+    // イベント地点か通常宿場かでラベルとボタン色を自動で切り替えます
+    const isEv = CourseHelper.isEvent(targetPt);
+    const kindTag = isEv
+      ? '<span style="background:#ffedd5; color:#c2410c; font-size:0.72rem; ' +
+        'padding:1px 6px; border-radius:4px; margin-right:6px;">🚩 道中イベント</span>'
+      : '';
+    const btnBg = isEv ? '#e67e22' : '#2e6f40';
+
     // ポップアップ全体のHTMLを流し込みます
     const bodyEl = document.getElementById('guide-modal-body');
     bodyEl.innerHTML =
       '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">' +
       '<span style="font-size:0.78rem; color:#6b7280; font-weight:bold;">' +
-      'スタートから ' + targetPt.km + ' km地点</span>' + badgeHtml + '</div>' +
+      kindTag + 'スタートから ' + targetPt.km + ' km地点</span>' + badgeHtml + '</div>' +
       '<h2 style="margin:3px 0 4px 0; font-size:1.15rem; color:#111827;">' +
       targetPt.name + '</h2>' +
       photosHtml +
       commentHtml +
       '<button type="button" id="btn-close-guide-modal" ' +
-      'style="width:100%; margin-top:10px; padding:10px; background:#2e6f40; ' +
+      'style="width:100%; margin-top:10px; padding:10px; background:' + btnBg + '; ' +
       'color:#ffffff; border:none; border-radius:8px; font-size:0.95rem; ' +
       'font-weight:bold; cursor:pointer;">✕ 閉じる</button>';
 

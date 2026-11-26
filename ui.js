@@ -147,7 +147,7 @@ const UIManager = {
       container.appendChild(col);
     }
   },
- // 【機能3】コース内の全地点と到達状況・到達日付けを描画する関数です
+  // 【機能3】コース内の全地点と到達状況・到達日付けを描画する関数です
   renderPointList: function(courseId, currentKm, reachedMap) {
     // リストを表示するul要素を取得します
     const listEl = document.getElementById('point-list');
@@ -166,13 +166,25 @@ const UIManager = {
       }
       // 現在の累計距離が地点の距離以上なら到達済みと判定します
       const isPassed = currentKm >= pt.km;
+      // 道中イベント地点かどうかも共通エンジンで判定します
+      const isEv = CourseHelper.isEvent(pt);
       // 到達日付（例: "2026-11-22"）があればスラッシュ形式に変換します
       const rawDate = Reflect.get(dateMap, String(pt.id));
       const dateStr = rawDate ? rawDate.replace(/-/g, '/') : '';
 
-      // 1行分のli要素を作成します
+      // 1行分のli要素を作成します（イベント行はeventクラスを追加します）
       const li = document.createElement('li');
-      li.className = isPassed ? 'point-item passed' : 'point-item';
+      let cls = 'point-item';
+      if (isEv) {
+        cls += ' event';
+      }
+      if (isPassed) {
+        cls += ' passed';
+      }
+      li.className = cls;
+
+      // イベント行の場合は左端に小さなオレンジバッジを付けます
+      const tagHtml = isEv ? '<span class="event-tag">🚩イベント</span>' : '';
 
       // 右側に表示するステータス文字（到達日付け＋距離）を決めます
       let statusText = '未到達（' + pt.km + 'km）';
@@ -184,8 +196,9 @@ const UIManager = {
         }
       }
 
-      // 左側に街の名前、右側にステータスを配置します
-      li.innerHTML = '<span>' + pt.name + '</span><span>' + statusText + '</span>';
+      // 左側に街の名前（＋イベントタグ）、右側にステータスを配置します
+      li.innerHTML = '<span>' + tagHtml + pt.name + '</span>' +
+        '<span style="flex-shrink:0;">' + statusText + '</span>';
       listEl.appendChild(li);
     }
   },
@@ -230,12 +243,17 @@ const UIManager = {
       }
       const opt = document.createElement('option');
       opt.value = String(pt.km);
-      // 0km地点（スタート地点）は分かりやすく表記します
+      const isEv = CourseHelper.isEvent(pt);
+
+      // 0km地点・通常宿場・イベント地点それぞれ分かりやすく表記します
       if (pt.km === 0) {
         opt.textContent = '0km：' + pt.name + '（最初から）';
+      } else if (isEv) {
+        opt.textContent = pt.km + 'km：　└ ' + pt.name;
       } else {
         opt.textContent = pt.km + 'km：' + pt.name;
       }
+
       // 現在設定中のワープ開始距離と一致する項目を選択状態にします
       if (pt.km === baseKm) {
         opt.selected = true;
@@ -320,4 +338,4 @@ const UIManager = {
     document.getElementById(targetId).classList.add('active');
   }
 };
-// --- ui.js ここまで --- 
+// --- ui.js ここまで ---

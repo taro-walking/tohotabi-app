@@ -67,6 +67,7 @@ const MapHtml = {
       const isPassed = progress.currentKm >= pt.km;
       const isLatest = (pt.id === progress.latestPoint.id);
       const isSel = (pt.id === selectedId);
+      const isEv = CourseHelper.isEvent(pt);
 
       if (isPassed) {
         passedCoords.push(x + ',' + y);
@@ -74,54 +75,70 @@ const MapHtml = {
 
       // 画面付近にあるピンだけHTML化します
       if (x >= -20 && x <= width + 20 && y >= -20 && y <= height + 20) {
-        // 現在地は赤、通過済みは緑、これからのポイントは鮮やかな黄色にします
-        const bg = isLatest ? '#ff3b30' : (isPassed ? '#2e6f40' : '#ffcc00');
-        // 選択中のピンは青い太枠で強調し、黄色いピンは黒枠でくっきりさせます
+        // 通常地点とイベント地点で色・形を明確に区分します
+        let bg = isPassed ? '#2e6f40' : '#ffcc00';
+        if (isEv) {
+          bg = isPassed ? '#0f766e' : '#ff9500';
+        }
+        if (isLatest) {
+          bg = '#ff3b30';
+        }
+        // 選択中のピンは青い太枠、未通過ピンは黒枠でくっきりさせます
         const bd = isSel ? '#007aff' : ((!isLatest && !isPassed) ? '#333333' : '#ffffff');
-        const sz = isSel ? 22 : (isLatest ? 20 : 14);
+        const baseSz = isEv ? 12 : 14;
+        const sz = isSel ? 20 : (isLatest ? 20 : baseSz);
         const off = sz / 2;
-        const zIdx = isSel ? 5 : (isLatest ? 4 : 3);
+        const zIdx = isSel ? 5 : (isLatest ? 4 : (isEv ? 2 : 3));
+        // イベント地点はひし形（角丸2px＋45度回転）、通常地点は丸型にします
+        const radius = isEv ? '2px' : '50%';
+        const rot = isEv ? 'transform:rotate(45deg); ' : '';
 
-        // タップ可能な丸いピンボタンです
-        pins += '<button type="button" data-point-id="' + pt.id + '" ';
+        // ブラウザ標準装飾に邪魔されないdiv要素でタップ可能なピンを作ります
+        pins += '<div role="button" data-point-id="' + pt.id + '" ';
         pins += 'style="position:absolute; left:' + (x - off) + 'px; ';
         pins += 'top:' + (y - off) + 'px; width:' + sz + 'px; ';
-        pins += 'height:' + sz + 'px; border-radius:50%; ';
-        pins += 'background:' + bg + '; border:2.5px solid ' + bd + '; ';
-        pins += 'z-index:' + zIdx + '; padding:0; cursor:pointer;">';
-        pins += '</button>';
+        pins += 'height:' + sz + 'px; border-radius:' + radius + '; ';
+        pins += rot + 'background:' + bg + '; border:2px solid ' + bd + '; ';
+        pins += 'box-sizing:border-box; z-index:' + zIdx + '; cursor:pointer;">';
+        pins += '</div>';
 
         // 現在地または拡大時（ズーム11以上）のみ地名ラベルを表示します
         if (isLatest || zoom >= 11) {
           const fw = isLatest ? 'bold' : 'normal';
-          const col = isLatest ? '#d93025' : '#111111';
+          const col = isLatest ? '#d93025' : (isEv ? '#9a3412' : '#111111');
           pins += '<div style="position:absolute; ';
-          pins += 'left:' + (x + off + 4) + 'px; top:' + (y - 8) + 'px; ';
+          pins += 'left:' + (x + off + 5) + 'px; top:' + (y - 8) + 'px; ';
           pins += 'font-size:11px; font-weight:' + fw + '; ';
-          pins += 'color:' + col + '; background:rgba(255,255,255,0.85); ';
+          pins += 'color:' + col + '; background:rgba(255,255,255,0.88); ';
           pins += 'padding:0 3px; border-radius:3px; ';
           pins += 'pointer-events:none; white-space:nowrap; z-index:3;">';
           pins += pt.name + '</div>';
         }
       }
 
-      // 選択中の地点情報は隣接ピンを隠さないよう地図下部の固定位置に表示します
+      // 選択中の地点情報を地図下部の固定カードに表示します
       if (isSel) {
+        const cardBd = isEv ? '#e67e22' : '#2e6f40';
+        const titleCol = isEv ? '#c2410c' : '#2e6f40';
+        const evTag = isEv
+          ? '<span style="background:#ffedd5; color:#c2410c; font-size:10px; ' +
+            'padding:1px 5px; border-radius:4px; margin-right:4px;">🚩イベント</span>'
+          : '';
         popup = '<div style="position:absolute; left:8px; right:8px; ';
         popup += 'bottom:44px; background:rgba(255,255,255,0.96); ';
-        popup += 'border:1.5px solid #2e6f40; border-radius:8px; ';
+        popup += 'border:1.5px solid ' + cardBd + '; border-radius:8px; ';
         popup += 'padding:6px 10px; font-size:11px; z-index:6; ';
         popup += 'box-shadow:0 2px 6px rgba(0,0,0,0.2); ';
         popup += 'pointer-events:none;">';
         popup += '<div style="display:flex; justify-content:space-between; ';
         popup += 'align-items:center; gap:6px;">';
-        popup += '<span style="font-weight:bold; color:#2e6f40;">';
-        popup += pt.name + ' (' + pt.km + 'km)</span>';
+        popup += '<span style="font-weight:bold; color:' + titleCol + ';">';
+        popup += evTag + pt.name + ' (' + pt.km + 'km)</span>';
         popup += '<button type="button" data-guide-id="' + pt.id + '" ';
-        popup += 'style="pointer-events:auto; background:#2e6f40; ';
+        popup += 'style="pointer-events:auto; background:' + cardBd + '; ';
         popup += 'color:#ffffff; border:none; border-radius:5px; ';
         popup += 'padding:3px 8px; font-size:11px; font-weight:bold; ';
-        popup += 'cursor:pointer;">📖 写真・ガイド</button></div>';
+        popup += 'cursor:pointer; flex-shrink:0;">📖 写真・ガイド</button></div>';
         popup += '<div style="margin-top:2px;">🏯 ' + pt.spot + '</div>';
         popup += '<div>🍱 ' + pt.specialty + '</div></div>';
       }
