@@ -75,39 +75,52 @@ const MapHtml = {
 
       // 画面付近にあるピンだけHTML化します
       if (x >= -20 && x <= width + 20 && y >= -20 && y <= height + 20) {
-        // 通常地点とイベント地点で色・形を明確に区分します
-        let bg = isPassed ? '#2e6f40' : '#ffcc00';
-        if (isEv) {
-          bg = isPassed ? '#0f766e' : '#ff9500';
-        }
-        if (isLatest) {
-          bg = '#ff3b30';
-        }
-        // 選択中のピンは青い太枠、未通過ピンは黒枠でくっきりさせます
-        const bd = isSel ? '#007aff' : ((!isLatest && !isPassed) ? '#333333' : '#ffffff');
-        const baseSz = isEv ? 12 : 14;
-        const sz = isSel ? 20 : (isLatest ? 20 : baseSz);
-        const off = sz / 2;
         const zIdx = isSel ? 5 : (isLatest ? 4 : (isEv ? 2 : 3));
-        // イベント地点はひし形（角丸2px＋45度回転）、通常地点は丸型にします
-        const radius = isEv ? '2px' : '50%';
-        const rot = isEv ? 'transform:rotate(45deg); ' : '';
+        let labelOffsetX = 12;
 
-        // ブラウザ標準装飾に邪魔されないdiv要素でタップ可能なピンを作ります
-        pins += '<div role="button" data-point-id="' + pt.id + '" ';
-        pins += 'style="position:absolute; left:' + (x - off) + 'px; ';
-        pins += 'top:' + (y - off) + 'px; width:' + sz + 'px; ';
-        pins += 'height:' + sz + 'px; border-radius:' + radius + '; ';
-        pins += rot + 'background:' + bg + '; border:2px solid ' + bd + '; ';
-        pins += 'box-sizing:border-box; z-index:' + zIdx + '; cursor:pointer;">';
-        pins += '</div>';
+        if (isEv && !isLatest) {
+          // 道中イベントはコースチェックリストと同じ赤旗マーク（🚩）で表示します
+          const flagSz = isSel ? 22 : 17;
+          const selRing = isSel
+            ? 'background:rgba(255,255,255,0.92); border:2px solid #007aff; border-radius:50%; '
+            : '';
+          const opacityStyle = isPassed ? 'opacity:0.85; ' : '';
+          pins += '<div role="button" data-point-id="' + pt.id + '" ';
+          pins += 'style="position:absolute; left:' + (x - 4) + 'px; ';
+          pins += 'top:' + (y - flagSz + 2) + 'px; width:' + (flagSz + 4) + 'px; ';
+          pins += 'height:' + (flagSz + 4) + 'px; display:flex; ';
+          pins += 'align-items:center; justify-content:center; ';
+          pins += 'font-size:' + flagSz + 'px; line-height:1; ';
+          pins += 'filter:drop-shadow(0 1px 2px rgba(0,0,0,0.45)); ';
+          pins += selRing + opacityStyle + 'z-index:' + zIdx + '; cursor:pointer;">';
+          pins += '🚩</div>';
+          labelOffsetX = flagSz + 2;
+        } else {
+          // 通常宿場および現在地は丸型ピンで表示します
+          let bg = isPassed ? '#2e6f40' : '#ffcc00';
+          if (isLatest) {
+            bg = '#ff3b30';
+          }
+          const bd = isSel ? '#007aff' : ((!isLatest && !isPassed) ? '#333333' : '#ffffff');
+          const sz = isSel ? 20 : (isLatest ? 20 : 14);
+          const off = sz / 2;
+          labelOffsetX = off + 5;
+
+          pins += '<div role="button" data-point-id="' + pt.id + '" ';
+          pins += 'style="position:absolute; left:' + (x - off) + 'px; ';
+          pins += 'top:' + (y - off) + 'px; width:' + sz + 'px; ';
+          pins += 'height:' + sz + 'px; border-radius:50%; ';
+          pins += 'background:' + bg + '; border:2px solid ' + bd + '; ';
+          pins += 'box-sizing:border-box; z-index:' + zIdx + '; cursor:pointer;">';
+          pins += '</div>';
+        }
 
         // 現在地または拡大時（ズーム11以上）のみ地名ラベルを表示します
         if (isLatest || zoom >= 11) {
           const fw = isLatest ? 'bold' : 'normal';
-          const col = isLatest ? '#d93025' : (isEv ? '#9a3412' : '#111111');
+          const col = isLatest ? '#d93025' : (isEv ? '#b91c1c' : '#111111');
           pins += '<div style="position:absolute; ';
-          pins += 'left:' + (x + off + 5) + 'px; top:' + (y - 8) + 'px; ';
+          pins += 'left:' + (x + labelOffsetX) + 'px; top:' + (y - 8) + 'px; ';
           pins += 'font-size:11px; font-weight:' + fw + '; ';
           pins += 'color:' + col + '; background:rgba(255,255,255,0.88); ';
           pins += 'padding:0 3px; border-radius:3px; ';

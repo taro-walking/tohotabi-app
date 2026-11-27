@@ -91,10 +91,12 @@ const GuideModal = {
         'padding:2px 8px; border-radius:10px;">🚩 未到達（あと ' + diffKm + ' km）</span>';
     }
 
-    // 共通エンジンから写真ファイル名一覧を自動取得します
+    // コース種別と写真ファイル名一覧、見出しラベルを自動取得します
+    const category = CourseHelper.getCategory(course);
     const fileList = CourseHelper.getPhotoFiles(targetPt);
+    const titles = CourseHelper.getGuideTitles(course);
 
-    // 写真エリアのHTMLを生成します（キャプション無しで上下にコンパクト表示）
+    // 写真エリアのHTMLを生成します
     let photosHtml = '';
     if (fileList.length > 0) {
       for (let i = 0; i < fileList.length; i++) {
@@ -107,7 +109,8 @@ const GuideModal = {
           'style="width:100%; max-height:155px; object-fit:cover; display:block;">' +
           '</div>';
       }
-    } else {
+    } else if (category === 'tokaido') {
+      // 東海道モードのみ画像未設定時に準備中枠を表示します
       photosHtml = '<div style="margin:8px 0; padding:18px 10px; ' +
         'border-radius:8px; background:#f8fafc; border:1px dashed #cbd5e1; ' +
         'text-align:center; color:#64748b; font-size:0.82rem;">' +
@@ -115,7 +118,7 @@ const GuideModal = {
         '（imagesフォルダに画像を追加すると表示されます）</span></div>';
     }
 
-    // 詳細な歴史・紀行コメント（10行以内に収まるスッキリ表示）を作ります
+    // 基本の解説カード（当時の面影・見どころ・スポット案内）を作ります
     const commentText = (targetPt.guideComment && targetPt.guideComment.trim() !== '')
       ? targetPt.guideComment.trim()
       : (targetPt.topic || '');
@@ -125,9 +128,23 @@ const GuideModal = {
       commentHtml = '<div style="margin-top:8px; background:#fffbeb; ' +
         'border-radius:8px; padding:9px 11px; border:1px solid #fde68a;">' +
         '<div style="font-weight:bold; color:#92400e; font-size:0.8rem; ' +
-        'margin-bottom:3px;">📜 当時の面影と現在の状況</div>' +
+        'margin-bottom:3px;">' + titles.mainTitle + '</div>' +
         '<div style="font-size:0.84rem; color:#1f2937; line-height:1.48;">' +
         commentText + '</div></div>';
+    }
+
+    // 画像が1枚以下の空きスペースに、新項目枠（extraNote）を自動表示します
+    const extraText = (targetPt.extraNote && targetPt.extraNote.trim() !== '')
+      ? targetPt.extraNote.trim()
+      : '';
+    let extraHtml = '';
+    if (fileList.length <= 1 && extraText !== '') {
+      extraHtml = '<div style="margin-top:7px; background:#f0fdf4; ' +
+        'border-radius:8px; padding:9px 11px; border:1px solid #bbf7d0;">' +
+        '<div style="font-weight:bold; color:#166534; font-size:0.8rem; ' +
+        'margin-bottom:3px;">' + titles.extraTitle + '</div>' +
+        '<div style="font-size:0.83rem; color:#1f2937; line-height:1.48;">' +
+        extraText + '</div></div>';
     }
 
     // イベント地点か通常宿場かでラベルとボタン色を自動で切り替えます
@@ -148,6 +165,7 @@ const GuideModal = {
       targetPt.name + '</h2>' +
       photosHtml +
       commentHtml +
+      extraHtml +
       '<button type="button" id="btn-close-guide-modal" ' +
       'style="width:100%; margin-top:10px; padding:10px; background:' + btnBg + '; ' +
       'color:#ffffff; border:none; border-radius:8px; font-size:0.95rem; ' +

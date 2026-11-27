@@ -99,12 +99,12 @@
             <input type="date" id="input-date" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
           </div>
         </div>
-    <!-- 2段目：歩数を数字で入力する欄です -->
+        <!-- 2段目：歩数を数字で入力する欄です -->
         <div class="form-group">
           <label for="input-steps">歩数（歩）</label>
           <input type="number" id="input-steps" inputmode="numeric" placeholder="例: 8000">
         </div>
-        <!-- 3段目：記録を保存する実行ボタンです -->
+<!-- 3段目：記録を保存する実行ボタンです -->
         <button id="btn-add-steps" class="primary-btn">この歩数を記録する</button>
       </section>
 
@@ -201,7 +201,12 @@
 
   <!-- 1-1. コース1（三陸ルート）の個別データを読み込みます -->
   <script src="course1.js?v=20261126a"></script>
-  <!-- 1-2. コース2（東海道五十三次）の個別データを読み込みます -->
+  <!-- 1-2. コース2（東海道五十三次）の4分割データを順番に読み込みます -->
+  <script src="course2_1.js?v=20261126a"></script>
+  <script src="course2_2.js?v=20261126a"></script>
+  <script src="course2_3.js?v=20261126a"></script>
+  <script src="course2_4.js?v=20261126a"></script>
+  <!-- 1-2b. 分割データを合体させるコース2本体を読み込みます -->
   <script src="course2.js?v=20261126a"></script>
   <!-- 1-3. 各コースデータをまとめる目次（master.js）を読み込みます -->
   <script src="master.js?v=20261126a"></script>
@@ -227,4 +232,4 @@
   <script src="main.js?v=20261126a"></script>
 </body>
 </html>
-<!-- --- index.html ここまで --- -->        
+<!-- --- index.html ここまで --- -->
